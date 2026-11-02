@@ -164,6 +164,8 @@ const PRESETS = [
   { key:'nail',       name:'剪指甲',   cycle:21,  icon:'✂️' },
   { key:'ear',        name:'洗耳朵',   cycle:14,  icon:'👂' },
   { key:'brush',      name:'梳毛',     cycle:3,   icon:'🪮' },
+  { key:'teeth',      name:'刷牙',     cycle:3,   icon:'🪥' },
+  { key:'litterbox',  name:'洗猫砂盆', cycle:7,   icon:'🧽' },
   { key:'litter',     name:'换猫砂',   cycle:14,  icon:'🧹' },
   { key:'checkup',    name:'体检',     cycle:365, icon:'🏥' },
 ];
@@ -312,7 +314,7 @@ function renderTasks(){
   const lacking = catsMissingPresets();
   const fixCard = lacking.length
     ? `<div class="card"><div class="meta">${lacking.map(c=>esc(c.name)).join('、')} 还没有完整默认日程</div>
-         <button class="btn small ghost wide" style="margin-top:8px" onclick="fillPresets()">补齐默认日程（9 项）</button></div>`
+         <button class="btn small ghost wide" style="margin-top:8px" onclick="fillPresets()">补齐默认日程（${PRESETS.length} 项）</button></div>`
     : '';
   el.innerHTML = fixCard + (rows.map(({t,s})=>`
     <div class="card">
@@ -376,9 +378,10 @@ function openCatEditor(id){
         <div><label>体重(kg)</label><input id="f_weight" type="number" step="0.01" value="${c.weight||''}"></div>
       </div>
       <div class="grid2">
-        <div><label>芯片号</label><input id="f_chip" value="${esc(c.chip)}" placeholder="15 位"></div>
+        <div><label>芯片号（可留空）</label><input id="f_chip" value="${esc(c.chip)}" placeholder="不知道就空着"></div>
         <div><label>绝育</label><select id="f_neutered">${opt('','未记录',c.neutered)}${opt('yes','已绝育',c.neutered)}${opt('no','未绝育',c.neutered)}</select></div>
       </div>
+      <div class="hint">芯片是医院植入、米粒大小的一个号码，扫一下能查到主人信息，猫走丢时有用；没植入就留空。</div>
       <label>绝育日期</label><input id="f_neuterDate" type="date" value="${c.neuterDate||''}">
 
       <div class="sect-title">生活</div>
@@ -390,7 +393,7 @@ function openCatEditor(id){
         <div><label>常去医院</label><input id="f_vet" value="${esc(c.vet)}"></div>
         <div><label>医院电话</label><input id="f_vetPhone" value="${esc(c.vetPhone)}"></div>
       </div>
-      <label>保险单号 / 其他</label><input id="f_insurance" value="${esc(c.insurance)}">
+      <label>保险单号（可留空）</label><input id="f_insurance" value="${esc(c.insurance)}">
 
       <div class="sect-title">健康</div>
       <label>过敏 / 忌口</label><input id="f_allergies" value="${esc(c.allergies)}" placeholder="无 / 某成分">
@@ -478,7 +481,7 @@ function openCatDetail(id){
       <div class="card" style="margin-top:14px">
         ${kv('小名',c.nickname)}${kv('生日',c.birthday?fmt(c.birthday):'')}${kv('到家',c.homeDate?fmt(c.homeDate):'')}
         ${kv('体重',c.weight?c.weight+' kg':'')}${kv('绝育',c.neutered==='yes'?('已绝育'+(c.neuterDate?' · '+fmt(c.neuterDate):'')):(c.neutered==='no'?'未绝育':''))}
-        ${kv('芯片',c.chip)}${kv('猫粮',c.food)}${kv('猫砂',c.litter)}
+        ${kv('芯片号',c.chip)}${kv('猫粮',c.food)}${kv('猫砂',c.litter)}
         ${kv('医院',c.vet)}${kv('电话',c.vetPhone)}${kv('保险',c.insurance)}
         ${kv('过敏',c.allergies)}${kv('病史',c.history)}${kv('备注',c.notes)}
       </div>
@@ -572,7 +575,7 @@ function openTaskEditor(id){
   document.getElementById('modalRoot').innerHTML = `<div class="modal" onclick="if(event.target===this)closeModal()">
     <div class="sheet">
       <h2>${isNew?'自定义事项':'调整事项'}</h2>
-      <label>事项名称</label><input id="t_name" value="${esc(t.name)}" placeholder="比如 洗猫砂盆 / 驱虫 / 换滤芯">
+      <label>事项名称</label><input id="t_name" value="${esc(t.name)}" placeholder="比如 洗猫砂盆 / 刷牙 / 喂化毛膏">
       <div class="grid2">
         <div><label>属于</label><select id="t_cat">${catOpts}</select></div>
         <div><label>图标</label><input id="t_icon" value="${esc(t.icon)}" maxlength="4"></div>
