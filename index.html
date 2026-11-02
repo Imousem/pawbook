@@ -11,13 +11,12 @@
 :root{
   --bg:#f6f0e8; --card:#fffdfa; --ink:#2c2620; --muted:#8b8177;
   --line:#e9e0d4; --brand:#d97a4a; --brand-soft:#f7e3d5;
-  --ok:#4f8a5b; --warn:#c98a1e; --late:#c0503f;
-  --tab:#fffdfa;
+  --ok:#4f8a5b; --warn:#c98a1e; --late:#c0503f; --tab:#fffdfa;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
-body{padding-bottom:calc(64px + env(safe-area-inset-bottom));}
+body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
 header{padding:18px 18px 10px;display:flex;align-items:baseline;gap:10px;max-width:560px;margin:0 auto}
 h1{font-size:20px;margin:0;letter-spacing:.5px}
 .sub{font-size:12px;color:var(--muted)}
@@ -29,13 +28,15 @@ main{padding:0 14px;max-width:560px;margin:0 auto}
 .cat-photo.empty{display:flex;align-items:center;justify-content:center;font-size:24px}
 .name{font-size:16px;font-weight:600}
 .meta{font-size:12px;color:var(--muted);margin-top:3px}
-.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;margin-right:6px}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;margin:2px 6px 2px 0}
 .b-ok{background:#e6f0e6;color:var(--ok)}
 .b-warn{background:#fbf0d8;color:var(--warn)}
 .b-late{background:#fbe3df;color:var(--late)}
+.b-none{background:#f0ece5;color:var(--muted)}
 .btn{border:0;border-radius:12px;padding:10px 14px;font-size:14px;background:var(--brand);color:#fff;font-weight:600}
 .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line);font-weight:500}
 .btn.small{padding:7px 11px;font-size:13px;border-radius:10px}
+.btn.wide{width:100%}
 input,select,textarea{font:inherit;color:inherit;background:#fff;border:1px solid var(--line);
   border-radius:10px;padding:9px 11px;width:100%}
 label{font-size:12px;color:var(--muted);display:block;margin:10px 0 4px}
@@ -49,26 +50,39 @@ nav button{flex:1;background:none;border:0;padding:10px 0 12px;font-size:11px;co
 nav button.on{color:var(--brand);font-weight:600}
 nav .ico{font-size:18px;line-height:1}
 .hidden{display:none!important}
-.empty-state{text-align:center;color:var(--muted);font-size:13px;padding:28px 10px}
+.empty-state{text-align:center;color:var(--muted);font-size:13px;padding:28px 10px;line-height:1.7}
 details{border-top:1px solid var(--line);padding:10px 0}
 details:first-of-type{border-top:0}
 summary{cursor:pointer;font-size:14px;font-weight:600;list-style:none}
 summary::-webkit-details-marker{display:none}
-summary:before{content:"›";display:inline-block;margin-right:8px;color:var(--brand);transform:rotate(0);transition:.2s}
+summary:before{content:"›";display:inline-block;margin-right:8px;color:var(--brand);transition:.2s}
 details[open] summary:before{transform:rotate(90deg)}
 details p{font-size:13px;color:#4a423a;line-height:1.6;margin:8px 0 0}
 .modal{position:fixed;inset:0;background:rgba(30,24,18,.45);display:flex;align-items:flex-end;z-index:40}
-.sheet{background:var(--card);width:100%;max-width:560px;margin:0 auto;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+.sheet{background:var(--card);width:100%;max-width:560px;margin:0 auto;max-height:92vh;overflow:auto;
+  border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
 .sheet h2{margin:0 0 6px;font-size:17px}
 .actions{display:flex;gap:10px;margin-top:16px}
 .actions .btn{flex:1}
-.wlist{font-size:13px;color:#4a423a}
-.wrow{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line)}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.kv span:first-child{color:var(--muted);flex:0 0 auto}
+.kv span:last-child{text-align:right;word-break:break-all}
 canvas{width:100%;height:110px;display:block}
 .toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%);background:rgba(35,28,22,.9);color:#fff;
   font-size:13px;padding:9px 14px;border-radius:10px;opacity:0;transition:.25s;pointer-events:none;z-index:60}
 .toast.show{opacity:1}
-.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.chips{display:flex;gap:8px;overflow:auto;padding:2px 0 10px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:13px;white-space:nowrap}
+.chip.on{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+.task{display:flex;gap:12px;align-items:center}
+.task .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.dot-ok{background:var(--ok)} .dot-warn{background:var(--warn)} .dot-late{background:var(--late)} .dot-none{background:#cfc6ba}
+.list-item{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;
+  padding:8px 0;border-bottom:1px dashed var(--line)}
+.list-item:last-child{border-bottom:0}
+.link{color:var(--brand);font-size:12px;text-decoration:none}
+.sect-title{font-size:13px;font-weight:600;margin:14px 0 6px}
+.hint{font-size:11px;color:var(--muted);line-height:1.6;margin-top:6px}
 </style>
 </head>
 <body>
@@ -77,10 +91,10 @@ canvas{width:100%;height:110px;display:block}
   <span class="sub" id="pageSub">PawBook</span>
 </header>
 <main>
-  <!-- 档案页 -->
+  <!-- 档案 -->
   <section id="view-cats">
     <div id="catsList"></div>
-    <button class="btn ghost" style="width:100%;margin-top:4px" onclick="openCatEditor()">＋ 添加一只猫</button>
+    <button class="btn ghost wide" style="margin-top:4px" onclick="openCatEditor()">＋ 添加一只猫</button>
     <div class="card" style="margin-top:16px">
       <div class="row" style="justify-content:space-between">
         <div>
@@ -89,7 +103,7 @@ canvas{width:100%;height:110px;display:block}
         </div>
         <button class="btn small ghost" onclick="editCamera()">设置</button>
       </div>
-      <button class="btn small" id="camBtn" style="width:100%;margin-top:10px" onclick="openCamera()">打开摄像头</button>
+      <button class="btn small wide" id="camBtn" style="margin-top:10px" onclick="openCamera()">打开摄像头</button>
     </div>
     <div class="card">
       <div class="name" style="font-size:14px">数据备份</div>
@@ -102,12 +116,24 @@ canvas{width:100%;height:110px;display:block}
     </div>
   </section>
 
-  <!-- 提醒页 -->
-  <section id="view-reminders" class="hidden">
-    <div id="remindersList"></div>
+  <!-- 日程 -->
+  <section id="view-tasks" class="hidden">
+    <div class="chips" id="taskFilters">
+      <button class="chip on" data-f="all" onclick="setFilter('all')">全部</button>
+      <button class="chip" data-f="late" onclick="setFilter('late')">已逾期</button>
+      <button class="chip" data-f="week" onclick="setFilter('week')">7 天内</button>
+      <button class="chip" data-f="none" onclick="setFilter('none')">未记录</button>
+    </div>
+    <div id="tasksList"></div>
+    <button class="btn ghost wide" style="margin-top:4px" onclick="openTaskEditor()">＋ 自定义事项</button>
+    <div class="card" style="margin-top:12px">
+      <div class="name" style="font-size:14px">导出到手机日历</div>
+      <div class="meta">生成 .ics 文件，用手机日历打开即可获得系统级提醒（完全免费、不需要服务器）。</div>
+      <button class="btn small wide ghost" style="margin-top:10px" onclick="exportICS()">导出未来一年日程</button>
+    </div>
   </section>
 
-  <!-- 百科页 -->
+  <!-- 百科 -->
   <section id="view-wiki" class="hidden">
     <input id="wikiSearch" placeholder="搜一下：驱虫、换粮、吐毛球…" oninput="renderWiki()" />
     <div class="card" style="margin-top:12px"><div id="wikiList"></div></div>
@@ -117,7 +143,7 @@ canvas{width:100%;height:110px;display:block}
 <nav>
   <div class="inner">
     <button id="tab-cats" class="on" onclick="switchTab('cats')"><span class="ico">🐾</span>档案</button>
-    <button id="tab-reminders" onclick="switchTab('reminders')"><span class="ico">💊</span>驱虫</button>
+    <button id="tab-tasks" onclick="switchTab('tasks')"><span class="ico">📅</span>日程</button>
     <button id="tab-wiki" onclick="switchTab('wiki')"><span class="ico">📖</span>百科</button>
   </div>
 </nav>
@@ -126,269 +152,365 @@ canvas{width:100%;height:110px;display:block}
 <div class="toast" id="toast"></div>
 
 <script>
-/* ========== 数据层 ========== */
-const KEY = 'pawbook.v1';
-const DEFAULT = { cats: [], camera: { name: '', url: '' }, settings: { remindDays: 3 } };
+/* ===================== 数据层 ===================== */
+const KEY = 'pawbook.v2';
+const V1KEY = 'pawbook.v1';
+
+const PRESETS = [
+  { key:'deworm_in',  name:'体内驱虫', cycle:90,  icon:'💊' },
+  { key:'deworm_out', name:'体外驱虫', cycle:30,  icon:'🧴' },
+  { key:'vaccine',    name:'疫苗加强', cycle:365, icon:'💉' },
+  { key:'weight',     name:'称体重',   cycle:30,  icon:'⚖️' },
+  { key:'nail',       name:'剪指甲',   cycle:21,  icon:'✂️' },
+  { key:'ear',        name:'洗耳朵',   cycle:14,  icon:'👂' },
+  { key:'brush',      name:'梳毛',     cycle:3,   icon:'🪮' },
+  { key:'litter',     name:'换猫砂',   cycle:14,  icon:'🧹' },
+  { key:'checkup',    name:'体检',     cycle:365, icon:'🏥' },
+];
+
+const DEFAULT = { version:2, cats:[], tasks:[], camera:{name:'',url:''}, settings:{remindDays:3} };
 let db = load();
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function today(){ const d=new Date(); return [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-'); }
+function addDays(iso, n){ const d=new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-'); }
+function daysBetween(a,b){ if(!a||!b) return null; return Math.round((new Date(b+'T00:00:00') - new Date(a+'T00:00:00'))/86400000); }
+function fmt(s){ return s ? s.replaceAll('-','/') : '—'; }
+function esc(s){ return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
 function load(){
   try{
     const raw = localStorage.getItem(KEY);
-    if(!raw) return structuredClone(DEFAULT);
-    const d = JSON.parse(raw);
-    return Object.assign(structuredClone(DEFAULT), d);
-  }catch(e){ return structuredClone(DEFAULT); }
+    if(raw) return Object.assign(structuredClone(DEFAULT), JSON.parse(raw));
+    const old = localStorage.getItem(V1KEY);
+    if(old) return migrate(JSON.parse(old));
+  }catch(e){}
+  return structuredClone(DEFAULT);
+}
+function migrate(v1){
+  const d = structuredClone(DEFAULT);
+  (v1.cats||[]).forEach(c=>{
+    d.cats.push({
+      id:c.id||uid(), name:c.name||'', nickname:'', breed:c.breed||'', sex:c.sex||'', color:'',
+      birthday:c.birthday||'', homeDate:'', neutered:'', neuterDate:'', chip:'',
+      weight:c.weight||'', weights: c.weight ? [{d:today(), kg:Number(c.weight)||0}] : [],
+      photo:c.photo||'', food:'', litter:'', vet:'', vetPhone:'', insurance:'',
+      allergies:'', history:'', notes:c.notes||'', vaccines:[]
+    });
+    PRESETS.forEach(p=>{
+      let last = '';
+      if(p.key==='deworm_in')  last = c.deworm?.inner?.date || '';
+      if(p.key==='deworm_out') last = c.deworm?.outer?.date || '';
+      d.tasks.push(mkTask(c.id, p.key, p.name, p.cycle, last, p.icon));
+    });
+  });
+  d.camera = v1.camera || d.camera;
+  d.settings = v1.settings || d.settings;
+  return d;
+}
+function mkTask(catId, key, name, cycle, lastDate, icon){
+  return { id:uid(), catId:catId||'', key:key||'custom', name, icon:icon||'📌',
+           cycleDays:cycle, lastDate:lastDate||'', remindDays:3, note:'' };
 }
 function save(){ localStorage.setItem(KEY, JSON.stringify(db)); }
-function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-function today(){ const d=new Date(); return d.toISOString().slice(0,10); }
-function fmtDate(s){ return s ? s.replaceAll('-','/') : '—'; }
-function daysBetween(a,b){ return Math.round((new Date(b) - new Date(a)) / 86400000); }
+function catName(id){ const c = db.cats.find(x=>x.id===id); return c ? c.name : '全部'; }
 
-/* 驱虫状态：返回 {state, due, left, label} */
-function dewormStatus(cat, kind){
-  const rec = cat.deworm?.[kind];
-  if(!rec || !rec.date) return { state:'none', label:'未记录', left:null, due:null };
-  const cycle = rec.cycle || (kind==='inner' ? 90 : 30);
-  const due = new Date(rec.date); due.setDate(due.getDate()+cycle);
-  const left = daysBetween(today(), due.toISOString().slice(0,10));
-  const warn = db.settings.remindDays ?? 3;
-  let state='ok', label='';
-  if(left < 0){ state='late'; label=`已逾期 ${-left} 天`; }
-  else if(left <= warn){ state='warn'; label=`还有 ${left} 天`; }
-  else { state='ok'; label=`还有 ${left} 天`; }
-  return { state, left, due: due.toISOString().slice(0,10), label,
-           kindName: kind==='inner' ? '体内' : '体外', cycle };
+/* ===================== 状态计算 ===================== */
+function taskStatus(t){
+  const remind = Number(t.remindDays ?? db.settings.remindDays ?? 3);
+  if(!t.lastDate) return { state:'none', label:'未记录', left:null, due:null };
+  const due = addDays(t.lastDate, Number(t.cycleDays)||30);
+  const left = daysBetween(today(), due);
+  if(left < 0) return { state:'late', label:`逾期 ${-left} 天`, left, due };
+  if(left <= remind) return { state:'warn', label:`还有 ${left} 天`, left, due };
+  return { state:'ok', label:`还有 ${left} 天`, left, due };
 }
 
-/* ========== 渲染：档案 ========== */
+/* ===================== 渲染：档案 ===================== */
 function switchTab(name){
-  ['cats','reminders','wiki'].forEach(k=>{
+  ['cats','tasks','wiki'].forEach(k=>{
     document.getElementById('view-'+k).classList.toggle('hidden', k!==name);
     document.getElementById('tab-'+k).classList.toggle('on', k===name);
   });
-  const titles = { cats:['猫手册','PawBook'], reminders:['驱虫提醒','到期与逾期'], wiki:['养猫百科','常见问题速查'] };
+  const titles = { cats:['猫手册','PawBook'], tasks:['日程','周期任务与提醒'], wiki:['养猫百科','常见问题速查'] };
   document.getElementById('pageTitle').textContent = titles[name][0];
   document.getElementById('pageSub').textContent = titles[name][1];
-  if(name==='reminders') renderReminders();
+  if(name==='tasks') renderTasks();
   if(name==='wiki') renderWiki();
 }
 
 function catCard(cat){
-  const inner = dewormStatus(cat,'inner'), outer = dewormStatus(cat,'outer');
-  const age = cat.birthday ? Math.floor(daysBetween(cat.birthday, today())/30.4) + ' 个月' : '';
-  const photo = cat.photo
-    ? `<img class="cat-photo" src="${cat.photo}" alt="">`
-    : `<div class="cat-photo empty">🐱</div>`;
+  const mine = db.tasks.filter(t=>t.catId===cat.id).map(t=>({t, s:taskStatus(t)}));
+  mine.sort((a,b)=>{
+    const w = x => x.s.state==='late'?0:x.s.state==='warn'?1:x.s.state==='none'?2:3;
+    return w(a)-w(b) || ((a.s.left??999)-(b.s.left??999));
+  });
+  const top = mine.slice(0,2).map(({t,s})=>`<span class="badge b-${s.state}">${t.icon||''}${esc(t.name)} · ${s.label}</span>`).join('');
+  const ageM = cat.birthday ? Math.floor(daysBetween(cat.birthday, today())/30.4) : null;
+  const photo = cat.photo ? `<img class="cat-photo" src="${cat.photo}" alt="">` : `<div class="cat-photo empty">🐱</div>`;
+  const meta = [cat.breed, cat.color, cat.sex==='m'?'公':cat.sex==='f'?'母':'', ageM!=null?ageM+' 个月':'', cat.weight?cat.weight+' kg':'']
+    .filter(Boolean).join(' · ') || '点开补充资料';
   return `<div class="card" onclick="openCatDetail('${cat.id}')">
-    <div class="row">
-      ${photo}
+    <div class="row">${photo}
       <div style="flex:1;min-width:0">
-        <div class="name">${esc(cat.name)} ${cat.sex==='m'?'♂':cat.sex==='f'?'♀':''}</div>
-        <div class="meta">${[cat.breed, age, cat.weight? cat.weight+'kg':''].filter(Boolean).join(' · ') || '点开补充资料'}</div>
+        <div class="name">${esc(cat.name)}${cat.nickname?` <span class="meta">（${esc(cat.nickname)}）</span>`:''}</div>
+        <div class="meta">${esc(meta)}</div>
       </div>
     </div>
-    <div style="margin-top:10px">
-      <span class="badge b-${inner.state}">体内 · ${inner.label}</span>
-      <span class="badge b-${outer.state}">体外 · ${outer.label}</span>
-    </div>
+    <div style="margin-top:10px">${top || '<span class="badge b-none">还没有安排事项</span>'}</div>
   </div>`;
 }
 
 function renderCats(){
   const el = document.getElementById('catsList');
-  if(!db.cats.length){
-    el.innerHTML = `<div class="card empty-state">还没有建档的猫猫<br>点下面的按钮加一只 🐈</div>`;
-  }else{
-    el.innerHTML = db.cats.map(catCard).join('');
-  }
+  el.innerHTML = db.cats.length
+    ? db.cats.map(catCard).join('')
+    : `<div class="card empty-state">还没有建档的猫猫<br>点下面的按钮加一只 🐈</div>`;
   const cam = db.camera;
-  document.getElementById('camMeta').textContent = cam.url ? `${cam.name || '摄像头'} · 已设置` : '未设置';
+  document.getElementById('camMeta').textContent = cam.url ? `${cam.name||'摄像头'} · 已设置` : '未设置';
   document.getElementById('camBtn').disabled = !cam.url;
   document.getElementById('camBtn').style.opacity = cam.url ? 1 : .45;
 }
 
-/* ========== 渲染：提醒 ========== */
-function renderReminders(){
-  const rows = [];
-  db.cats.forEach(cat=>{
-    ['inner','outer'].forEach(k=>{
-      const s = dewormStatus(cat,k);
-      rows.push({ cat, kind:k, s });
-    });
+/* ===================== 渲染：日程 ===================== */
+let taskFilter = 'all';
+function setFilter(f){
+  taskFilter = f;
+  document.querySelectorAll('#taskFilters .chip').forEach(c=>c.classList.toggle('on', c.dataset.f===f));
+  renderTasks();
+}
+
+function catsMissingPresets(){
+  return db.cats.filter(c=>{
+    const have = db.tasks.filter(t=>t.catId===c.id).map(t=>t.key);
+    return PRESETS.some(p=>!have.includes(p.key));
   });
+}
+function fillPresets(){
+  catsMissingPresets().forEach(c=>{
+    const have = db.tasks.filter(t=>t.catId===c.id).map(t=>t.key);
+    PRESETS.forEach(p=>{ if(!have.includes(p.key)) db.tasks.push(mkTask(c.id, p.key, p.name, p.cycle, '', p.icon)); });
+  });
+  save(); renderTasks(); renderCats(); toast('已补齐默认日程');
+}
+
+function renderTasks(){
+  let rows = db.tasks.map(t=>({t, s:taskStatus(t)}));
+  if(taskFilter==='late') rows = rows.filter(r=>r.s.state==='late');
+  if(taskFilter==='none') rows = rows.filter(r=>r.s.state==='none');
+  if(taskFilter==='week') rows = rows.filter(r=>r.s.left!==null && r.s.left<=7);
   rows.sort((a,b)=>{
-    const w = x => x.s.state==='late'?0:x.s.state==='warn'?1:x.s.state==='ok'?2:3;
-    return w(a)-w(b) || (a.s.left??999)-(b.s.left??999);
+    const w = x => x.s.state==='late'?0:x.s.state==='warn'?1:x.s.state==='none'?2:3;
+    return w(a)-w(b) || ((a.s.left??999)-(b.s.left??999));
   });
-  const el = document.getElementById('remindersList');
-  if(!db.cats.length){ el.innerHTML = `<div class="card empty-state">先添加猫猫，这里才有日程</div>`; return; }
-  el.innerHTML = rows.map(r=>{
-    const s=r.s, c=r.cat;
-    const txt = s.state==='none' ? '还没记录过' :
-      s.state==='late' ? `逾期 ${-s.left} 天（应 ${fmtDate(s.due)}）` :
-      s.state==='warn' ? `${s.label}（${fmtDate(s.due)}）` : `下次 ${fmtDate(s.due)}`;
-    return `<div class="card">
-      <div class="row" style="justify-content:space-between">
-        <div>
-          <div class="name">${esc(c.name)} · ${s.kindName||(r.kind==='inner'?'体内':'体外')}驱虫</div>
-          <div class="meta">${txt} · 周期 ${s.cycle||(r.kind==='inner'?90:30)} 天</div>
+
+  const el = document.getElementById('tasksList');
+  if(!db.tasks.length){
+    el.innerHTML = `<div class="card empty-state">还没有事项<br>加猫时会给一份默认清单，也可以自己加</div>`;
+    return;
+  }
+  const lacking = catsMissingPresets();
+  const fixCard = lacking.length
+    ? `<div class="card"><div class="meta">${lacking.map(c=>esc(c.name)).join('、')} 还没有完整默认日程</div>
+         <button class="btn small ghost wide" style="margin-top:8px" onclick="fillPresets()">补齐默认日程（9 项）</button></div>`
+    : '';
+  el.innerHTML = fixCard + (rows.map(({t,s})=>`
+    <div class="card">
+      <div class="task">
+        <div class="dot dot-${s.state}"></div>
+        <div style="flex:1;min-width:0">
+          <div class="name" style="font-size:15px">${t.icon||''} ${esc(t.name)}</div>
+          <div class="meta">${esc(catName(t.catId))} · 每 ${t.cycleDays} 天${t.lastDate?` · 上次 ${fmt(t.lastDate)}`:' · 还没做过'} · ${s.label}${s.due?`（下次 ${fmt(s.due)}）`:''}</div>
         </div>
-        <button class="btn small" onclick="markDewormed('${c.id}','${r.kind}')">今天做了</button>
       </div>
-    </div>`;
-  }).join('');
+      <div class="grid2" style="margin-top:10px">
+        <button class="btn small" onclick="event.stopPropagation();completeTask('${t.id}')">今天做了</button>
+        <button class="btn small ghost" onclick="event.stopPropagation();openTaskEditor('${t.id}')">调整</button>
+      </div>
+    </div>`).join('') || `<div class="card empty-state">这个筛选下没有事项</div>`);
 }
 
-function markDewormed(catId, kind){
-  const cat = db.cats.find(c=>c.id===catId); if(!cat) return;
-  cat.deworm = cat.deworm || {};
-  cat.deworm[kind] = cat.deworm[kind] || { date:'', cycle: kind==='inner'?90:30 };
-  cat.deworm[kind].date = today();
-  save(); renderCats(); renderReminders(); toast('已记录今天');
+function completeTask(id){
+  const t = db.tasks.find(x=>x.id===id); if(!t) return;
+  t.lastDate = today(); save(); renderTasks(); renderCats(); toast('已记录今天');
 }
 
-/* ========== 渲染：百科 ========== */
-const WIKI = [
-  { t:'什么时候开始驱虫、多久一次', b:'幼猫一般 2 月龄开始：体内每 3 个月一次，体外每月一次（南方/草丛/多猫家庭可缩短）。成年室内猫也建议体内 3–6 个月、体外 1–3 个月。记录日期比记周期更重要。' },
-  { t:'体内外驱虫能同时做吗', b:'多数复方药（滴剂）体内外同驱，可以同时；若用分开的药，错开 3–5 天更稳。驱虫前后 2 小时不洗澡，滴剂点在颈后皮肤、别让它舔到。' },
-  { t:'换粮怎么过渡', b:'7 天过渡法：第 1–2 天新粮 25%，3–4 天 50%，5–6 天 75%，第 7 天全换。换快了容易软便；同时加益生菌。' },
-  { t:'猫咪吐毛球正常吗', b:'偶尔吐毛球正常，每周超过 1 次或伴随精神食欲下降要就医。长毛猫每周梳 3–4 次，比吃化毛膏更有效。' },
-  { t:'软便 / 拉稀怎么处理', b:'先看精神和食欲。精神好、能吃：禁食 6–8 小时（不禁水）+ 益生菌，观察 24 小时。带血、持续 2 天、伴呕吐或精神差 → 就医。' },
-  { t:'猫咪应激（搬家、去医院、洗澡）', b:'提前 30–60 分钟用费洛蒙喷雾/插电，航空箱放件有它气味的衣服；不要强行抱出，让它自己出来。长途可咨询医生用加巴喷丁。' },
-  { t:'公猫排尿困难 = 急症', b:'频繁进猫砂盆却尿不出、蹲很久、叫、舔生殖器 → 可能尿闭，24 小时内可致命，立刻就医。公猫尤其高发，别等。' },
-  { t:'什么时候绝育', b:'一般 5–8 月龄、体重达标即可。术前禁食 8 小时（遵医嘱），术后戴伊丽莎白圈 7–10 天，观察伤口渗液与排尿。' },
-  { t:'疫苗怎么打', b:'幼猫 2 月龄起打三联，间隔 3–4 周共 2–3 针；狂犬 3 月龄后 1 针。成年后每年加强一次（室内单猫可与医生讨论延长）。' },
-  { t:'猫咪喝水量多少', b:'每公斤约 40–60 ml/天。3 kg 的猫约 150 ml。用流动水碗、湿粮、多点水碗能明显提升饮水量，减少泌尿问题。' },
-  { t:'指甲、耳朵多久清理', b:'指甲 2–3 周剪一次（只剪透明的尖，避开血线）；耳朵 1–2 周看一眼，脏了用洗耳液擦外耳，不要棉签捅深。' },
-  { t:'猫粮怎么挑（看配料表）', b:'前三位是具体肉源；幼猫粗蛋白 ≥38%、成猫 ≥32%；钙磷比 1.1–1.3；牛磺酸 ≥0.2%。预算有限时优先保证蛋白与肉源，配方表比广告词重要。' },
-  { t:'家里有哪些致命危险', b:'百合（对猫剧毒，花粉也不行）、绿萝/万年青、灭鼠药、人用止痛药（布洛芬、对乙酰氨基酚）、线头与皮筋、洗衣机。' },
-  { t:'多猫家庭怎么相处', b:'新猫先隔离 1–2 周，交换毛巾气味，再隔门喂食逐步见面。资源要 N+1（猫砂盆、食盆、水碗、猫爬架高点）。' },
-];
-
-function renderWiki(){
-  const q = (document.getElementById('wikiSearch').value || '').trim();
-  const list = q ? WIKI.filter(w => (w.t+w.b).includes(q)) : WIKI;
-  document.getElementById('wikiList').innerHTML = list.length
-    ? list.map(w=>`<details><summary>${esc(w.t)}</summary><p>${esc(w.b)}</p></details>`).join('')
-    : `<div class="empty-state">没搜到，换个词试试</div>`;
-}
-
-/* ========== 编辑器 ========== */
-function esc(s){ return String(s??'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-function toast(msg){
-  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
-  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),1600);
-}
+/* ===================== 编辑器：猫 ===================== */
 function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
 
 function openCatEditor(id){
-  const c = id ? db.cats.find(x=>x.id===id) : { id:uid(), name:'', breed:'', sex:'', birthday:'', weight:'', photo:'', notes:'', deworm:{} };
   const isNew = !id;
+  const c = id ? db.cats.find(x=>x.id===id)
+    : { id:uid(), name:'', nickname:'', breed:'', sex:'', color:'', birthday:'', homeDate:'', neutered:'',
+        neuterDate:'', chip:'', weight:'', weights:[], photo:'', food:'', litter:'', vet:'', vetPhone:'',
+        insurance:'', allergies:'', history:'', notes:'', vaccines:[] };
   const photo = c.photo || '';
+  const opt = (v,label,cur)=>`<option value="${v}" ${cur===v?'selected':''}>${label}</option>`;
   document.getElementById('modalRoot').innerHTML = `<div class="modal" onclick="if(event.target===this)closeModal()">
     <div class="sheet">
       <h2>${isNew?'添加猫猫':'编辑资料'}</h2>
-      <div class="row" style="margin:12px 0;align-items:center;gap:14px">
+
+      <div class="row" style="margin:12px 0;gap:14px">
         <div id="photoBox" style="width:72px;height:72px;border-radius:16px;overflow:hidden;background:var(--brand-soft);display:flex;align-items:center;justify-content:center;font-size:28px">
           ${photo?`<img src="${photo}" style="width:100%;height:100%;object-fit:cover">`:'🐱'}
         </div>
-        <div style="flex:1">
-          <button class="btn small ghost" onclick="document.getElementById('photoFile').click()">选择照片</button>
-          <input type="file" id="photoFile" accept="image/*" class="hidden" onchange="pickPhoto(this)">
-        </div>
+        <div style="flex:1"><button class="btn small ghost" onclick="document.getElementById('photoFile').click()">选择照片</button>
+          <input type="file" id="photoFile" accept="image/*" class="hidden" onchange="pickPhoto(this)"></div>
       </div>
-      <label>名字</label><input id="f_name" value="${esc(c.name)}" placeholder="比如 毛豆">
+
+      <div class="sect-title">基本信息</div>
       <div class="grid2">
-        <div><label>品种</label><input id="f_breed" value="${esc(c.breed)}" placeholder="英短 / 拿破仑…"></div>
-        <div><label>性别</label><select id="f_sex">
-          <option value="" ${!c.sex?'selected':''}>未知</option>
-          <option value="m" ${c.sex==='m'?'selected':''}>公</option>
-          <option value="f" ${c.sex==='f'?'selected':''}>母</option>
-        </select></div>
+        <div><label>名字</label><input id="f_name" value="${esc(c.name)}" placeholder="毛豆"></div>
+        <div><label>小名</label><input id="f_nickname" value="${esc(c.nickname)}" placeholder="豆豆"></div>
       </div>
       <div class="grid2">
+        <div><label>品种</label><input id="f_breed" value="${esc(c.breed)}" placeholder="英短 / 拿破仑"></div>
+        <div><label>花色</label><input id="f_color" value="${esc(c.color)}" placeholder="蓝白 / 三花"></div>
+      </div>
+      <div class="grid2">
+        <div><label>性别</label><select id="f_sex">${opt('','未知',c.sex)}${opt('m','公',c.sex)}${opt('f','母',c.sex)}</select></div>
         <div><label>生日</label><input id="f_birthday" type="date" value="${c.birthday||''}"></div>
-        <div><label>体重(kg)</label><input id="f_weight" type="number" step="0.01" value="${c.weight||''}" placeholder="4.2"></div>
       </div>
-      <label>备注（绝育、疫苗、过敏…）</label><textarea id="f_notes" rows="3">${esc(c.notes)}</textarea>
+      <div class="grid2">
+        <div><label>到家日</label><input id="f_homeDate" type="date" value="${c.homeDate||''}"></div>
+        <div><label>体重(kg)</label><input id="f_weight" type="number" step="0.01" value="${c.weight||''}"></div>
+      </div>
+      <div class="grid2">
+        <div><label>芯片号</label><input id="f_chip" value="${esc(c.chip)}" placeholder="15 位"></div>
+        <div><label>绝育</label><select id="f_neutered">${opt('','未记录',c.neutered)}${opt('yes','已绝育',c.neutered)}${opt('no','未绝育',c.neutered)}</select></div>
+      </div>
+      <label>绝育日期</label><input id="f_neuterDate" type="date" value="${c.neuterDate||''}">
+
+      <div class="sect-title">生活</div>
+      <div class="grid2">
+        <div><label>猫粮</label><input id="f_food" value="${esc(c.food)}" placeholder="皇家奶糕"></div>
+        <div><label>猫砂</label><input id="f_litter" value="${esc(c.litter)}" placeholder="豆腐砂"></div>
+      </div>
+      <div class="grid2">
+        <div><label>常去医院</label><input id="f_vet" value="${esc(c.vet)}"></div>
+        <div><label>医院电话</label><input id="f_vetPhone" value="${esc(c.vetPhone)}"></div>
+      </div>
+      <label>保险单号 / 其他</label><input id="f_insurance" value="${esc(c.insurance)}">
+
+      <div class="sect-title">健康</div>
+      <label>过敏 / 忌口</label><input id="f_allergies" value="${esc(c.allergies)}" placeholder="无 / 某成分">
+      <label>既往病史</label><textarea id="f_history" rows="2">${esc(c.history)}</textarea>
+      <label>备注</label><textarea id="f_notes" rows="2">${esc(c.notes)}</textarea>
+
       <div class="actions">
-        ${isNew?'':'<button class="btn ghost" style="flex:0 0 88px" onclick="deleteCat(\''+c.id+'\')">删除</button>'}
+        ${isNew?'':`<button class="btn ghost" style="flex:0 0 84px" onclick="deleteCat('${c.id}')">删除</button>`}
         <button class="btn ghost" onclick="closeModal()">取消</button>
-        <button class="btn" onclick="saveCat('${c.id}', ${isNew}, '${photo?'1':'0'}')">保存</button>
+        <button class="btn" onclick="saveCat('${c.id}',${isNew})">保存</button>
       </div>
     </div>
   </div>`;
-  window.__editingPhoto = photo;
+  window.__photo = photo;
 }
 
 function pickPhoto(input){
   const f = input.files[0]; if(!f) return;
-  const img = new Image(); const reader = new FileReader();
-  reader.onload = e => {
+  const img = new Image(), rd = new FileReader();
+  rd.onload = e => {
     img.onload = () => {
-      const max = 640, scale = Math.min(1, max/Math.max(img.width,img.height));
-      const cv = document.createElement('canvas');
-      cv.width = Math.round(img.width*scale); cv.height = Math.round(img.height*scale);
+      const max=640, k=Math.min(1,max/Math.max(img.width,img.height));
+      const cv=document.createElement('canvas');
+      cv.width=Math.round(img.width*k); cv.height=Math.round(img.height*k);
       cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
-      const data = cv.toDataURL('image/jpeg', .82);
-      window.__editingPhoto = data;
-      const box = document.getElementById('photoBox');
-      box.innerHTML = `<img src="${data}" style="width:100%;height:100%;object-fit:cover">`;
+      const data=cv.toDataURL('image/jpeg',.82);
+      window.__photo=data;
+      document.getElementById('photoBox').innerHTML=`<img src="${data}" style="width:100%;height:100%;object-fit:cover">`;
     };
-    img.src = e.target.result;
+    img.src=e.target.result;
   };
-  reader.readAsDataURL(f);
+  rd.readAsDataURL(f);
 }
 
-function saveCat(id, isNew, hasPhoto){
-  const name = document.getElementById('f_name').value.trim();
+function saveCat(id, isNew){
+  const val = k => { const el=document.getElementById(k); return el ? el.value.trim() : ''; };
+  const name = val('f_name');
   if(!name){ toast('至少写个名字'); return; }
-  const data = {
-    id, name,
-    breed: document.getElementById('f_breed').value.trim(),
-    sex: document.getElementById('f_sex').value,
-    birthday: document.getElementById('f_birthday').value,
-    weight: document.getElementById('f_weight').value,
-    notes: document.getElementById('f_notes').value.trim(),
-    photo: window.__editingPhoto || '',
-    deworm: (db.cats.find(x=>x.id===id)||{}).deworm || {}
+  const base = {
+    id, name, nickname:val('f_nickname'), breed:val('f_breed'), color:val('f_color'),
+    sex:val('f_sex'), birthday:val('f_birthday'), homeDate:val('f_homeDate'),
+    weight:val('f_weight'), neutered:val('f_neutered'), neuterDate:val('f_neuterDate'),
+    chip:val('f_chip'), food:val('f_food'), litter:val('f_litter'), vet:val('f_vet'),
+    vetPhone:val('f_vetPhone'), insurance:val('f_insurance'), allergies:val('f_allergies'),
+    history:val('f_history'), notes:val('f_notes'), photo: window.__photo || ''
   };
   const i = db.cats.findIndex(x=>x.id===id);
-  if(i>=0) db.cats[i] = Object.assign(db.cats[i], data); else db.cats.unshift(data);
-  save(); closeModal(); renderCats(); renderReminders(); toast(isNew?'已添加':'已保存');
+  if(i>=0){
+    db.cats[i] = Object.assign(db.cats[i], base);
+  }else{
+    db.cats.unshift(Object.assign({ weights:[], vaccines:[] }, base));
+    PRESETS.forEach(p=> db.tasks.push(mkTask(id, p.key, p.name, p.cycle, '', p.icon)));
+  }
+  save(); closeModal(); renderCats(); renderTasks(); toast(isNew?'已添加（含默认日程）':'已保存');
 }
 
 function deleteCat(id){
-  if(!confirm('删除这只猫的全部资料？')) return;
-  db.cats = db.cats.filter(x=>x.id!==id); save(); closeModal(); renderCats(); renderReminders();
+  if(!confirm('删除这只猫和它的全部日程？')) return;
+  db.cats = db.cats.filter(x=>x.id!==id);
+  db.tasks = db.tasks.filter(t=>t.catId!==id);
+  save(); closeModal(); renderCats(); renderTasks();
 }
 
+/* ===================== 猫详情 ===================== */
 function openCatDetail(id){
   const c = db.cats.find(x=>x.id===id); if(!c) return;
-  const inner = dewormStatus(c,'inner'), outer = dewormStatus(c,'outer');
+  const mine = db.tasks.filter(t=>t.catId===c.id).map(t=>({t,s:taskStatus(t)}));
+  mine.sort((a,b)=>((a.s.left??9999)-(b.s.left??9999)));
   const age = c.birthday ? Math.floor(daysBetween(c.birthday, today())/30.4) : null;
+
+  const kv = (k,v)=> v ? `<div class="kv"><span>${k}</span><span>${esc(v)}</span></div>` : '';
+  const wl = (c.weights||[]).slice().sort((a,b)=>a.d<b.d?-1:1);
+  const chart = weightChart(wl);
+
   document.getElementById('modalRoot').innerHTML = `<div class="modal" onclick="if(event.target===this)closeModal()">
     <div class="sheet">
       <div class="row" style="gap:14px">
-        ${c.photo?`<img src="${c.photo}" style="width:76px;height:76px;border-radius:18px;object-fit:cover">`:`<div style="width:76px;height:76px;border-radius:18px;background:var(--brand-soft);display:flex;align-items:center;justify-content:center;font-size:30px">🐱</div>`}
-        <div>
-          <h2 style="margin:0">${esc(c.name)}</h2>
-          <div class="meta">${[c.breed, c.sex==='m'?'公':c.sex==='f'?'母':'', age!=null?age+' 个月':'', c.birthday?fmtDate(c.birthday):''].filter(Boolean).join(' · ')}</div>
+        ${c.photo?`<img src="${c.photo}" style="width:76px;height:76px;border-radius:18px;object-fit:cover">`
+                :`<div style="width:76px;height:76px;border-radius:18px;background:var(--brand-soft);display:flex;align-items:center;justify-content:center;font-size:30px">🐱</div>`}
+        <div><h2 style="margin:0">${esc(c.name)}</h2>
+          <div class="meta">${[c.breed,c.color,c.sex==='m'?'公':c.sex==='f'?'母':'',age!=null?age+' 个月':''].filter(Boolean).join(' · ')}</div>
         </div>
       </div>
-      ${c.notes?`<div class="card" style="margin-top:14px"><div class="meta" style="white-space:pre-wrap">${esc(c.notes)}</div></div>`:''}
-      <div class="card" style="margin-top:12px">
-        <div class="name" style="font-size:14px">驱虫</div>
-        <div class="wlist" style="margin-top:8px">
-          <div class="wrow"><span>体内 · 上次 ${fmtDate(c.deworm?.inner?.date)}</span><span class="badge b-${inner.state}">${inner.label}</span></div>
-          <div class="wrow"><span>体外 · 上次 ${fmtDate(c.deworm?.outer?.date)}</span><span class="badge b-${outer.state}">${outer.label}</span></div>
-        </div>
-        <div class="grid2" style="margin-top:10px">
-          <button class="btn small" onclick="markDewormed('${c.id}','inner');closeModal()">体内今天做了</button>
-          <button class="btn small" onclick="markDewormed('${c.id}','outer');closeModal()">体外今天做了</button>
-        </div>
+
+      <div class="card" style="margin-top:14px">
+        ${kv('小名',c.nickname)}${kv('生日',c.birthday?fmt(c.birthday):'')}${kv('到家',c.homeDate?fmt(c.homeDate):'')}
+        ${kv('体重',c.weight?c.weight+' kg':'')}${kv('绝育',c.neutered==='yes'?('已绝育'+(c.neuterDate?' · '+fmt(c.neuterDate):'')):(c.neutered==='no'?'未绝育':''))}
+        ${kv('芯片',c.chip)}${kv('猫粮',c.food)}${kv('猫砂',c.litter)}
+        ${kv('医院',c.vet)}${kv('电话',c.vetPhone)}${kv('保险',c.insurance)}
+        ${kv('过敏',c.allergies)}${kv('病史',c.history)}${kv('备注',c.notes)}
       </div>
+
+      <div class="sect-title">体重记录</div>
+      <div class="card">
+        ${chart}
+        <div class="grid2" style="margin-top:8px">
+          <input id="w_kg" type="number" step="0.01" placeholder="kg">
+          <button class="btn small" onclick="addWeight('${c.id}')">记录今天</button>
+        </div>
+        <div class="hint">${wl.length?`最近：${wl.slice(-3).map(x=>fmt(x.d)+' '+x.kg+'kg').join(' / ')}`:'还没有记录'}</div>
+      </div>
+
+      <div class="sect-title">疫苗记录</div>
+      <div class="card">
+        ${(c.vaccines||[]).map((v,i)=>`<div class="list-item">
+            <span>${esc(v.name)||'疫苗'} · ${fmt(v.date)}${v.next?' → 下次 '+fmt(v.next):''}</span>
+            <a class="link" onclick="delVaccine('${c.id}',${i})">删除</a></div>`).join('') || '<div class="meta">还没有记录</div>'}
+        <div class="grid2" style="margin-top:8px">
+          <input id="v_name" placeholder="三联 / 狂犬">
+          <input id="v_date" type="date">
+        </div>
+        <button class="btn small ghost wide" style="margin-top:8px" onclick="addVaccine('${c.id}')">添加一条</button>
+      </div>
+
+      <div class="sect-title">这只猫的日程</div>
+      ${mine.map(({t,s})=>`<div class="list-item">
+          <span>${t.icon||''} ${esc(t.name)} · <span class="badge b-${s.state}">${s.label}</span></span>
+          <a class="link" onclick="completeTask('${t.id}');closeModal();openCatDetail('${c.id}')">今天做了</a>
+        </div>`).join('') || '<div class="meta">还没有事项</div>'}
+
       <div class="actions">
         <button class="btn ghost" onclick="closeModal()">关闭</button>
         <button class="btn" onclick="closeModal();openCatEditor('${c.id}')">编辑资料</button>
@@ -397,17 +519,135 @@ function openCatDetail(id){
   </div>`;
 }
 
-/* ========== 摄像头 ========== */
+function addWeight(catId){
+  const c = db.cats.find(x=>x.id===catId); if(!c) return;
+  const el = document.getElementById('w_kg'); const kg = Number(el.value);
+  if(!kg || kg<=0){ toast('先填个体重'); return; }
+  c.weights = c.weights || [];
+  c.weights.push({ d: today(), kg });
+  c.weight = String(kg);
+  const wt = db.tasks.find(t=>t.catId===catId && t.key==='weight');
+  if(wt) wt.lastDate = today();
+  save(); toast('已记录'); openCatDetail(catId); renderCats();
+}
+
+function addVaccine(catId){
+  const c = db.cats.find(x=>x.id===catId); if(!c) return;
+  const name = document.getElementById('v_name').value.trim();
+  const date = document.getElementById('v_date').value || today();
+  c.vaccines = c.vaccines || [];
+  c.vaccines.push({ name: name||'疫苗', date, next: addDays(date, 365) });
+  const vt = db.tasks.find(t=>t.catId===catId && t.key==='vaccine');
+  if(vt) vt.lastDate = date;
+  save(); toast('已添加'); openCatDetail(catId);
+}
+function delVaccine(catId, i){
+  const c = db.cats.find(x=>x.id===catId); if(!c) return;
+  c.vaccines.splice(i,1); save(); openCatDetail(catId);
+}
+
+function weightChart(list){
+  if(list.length < 2) return `<div class="hint">至少两条记录才画得出曲线</div>`;
+  const W=320,H=100,P=10;
+  const kgs = list.map(x=>Number(x.kg));
+  const min=Math.min(...kgs), max=Math.max(...kgs), span=(max-min)||1;
+  const pts = list.map((x,i)=>{
+    const px = P + i*(W-2*P)/(list.length-1);
+    const py = H-P - (Number(x.kg)-min)/span*(H-2*P);
+    return `${px.toFixed(1)},${py.toFixed(1)}`;
+  }).join(' ');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:110px">
+    <polyline points="${pts}" fill="none" stroke="#d97a4a" stroke-width="2.5" stroke-linejoin="round"/>
+    <text x="${P}" y="12" font-size="10" fill="#8b8177">${max}kg</text>
+    <text x="${P}" y="${H-2}" font-size="10" fill="#8b8177">${min}kg</text>
+  </svg>`;
+}
+
+/* ===================== 编辑器：任务 ===================== */
+function openTaskEditor(id){
+  const isNew = !id;
+  const t = id ? db.tasks.find(x=>x.id===id)
+    : { id:uid(), catId:'', key:'custom', name:'', icon:'📌', cycleDays:30, lastDate:'', remindDays:3, note:'' };
+  const catOpts = `<option value="">全部猫</option>` + db.cats.map(c=>`<option value="${c.id}" ${t.catId===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+  document.getElementById('modalRoot').innerHTML = `<div class="modal" onclick="if(event.target===this)closeModal()">
+    <div class="sheet">
+      <h2>${isNew?'自定义事项':'调整事项'}</h2>
+      <label>事项名称</label><input id="t_name" value="${esc(t.name)}" placeholder="比如 洗猫砂盆 / 驱虫 / 换滤芯">
+      <div class="grid2">
+        <div><label>属于</label><select id="t_cat">${catOpts}</select></div>
+        <div><label>图标</label><input id="t_icon" value="${esc(t.icon)}" maxlength="4"></div>
+      </div>
+      <div class="grid3">
+        <div><label>每几天</label><input id="t_cycle" type="number" min="1" value="${t.cycleDays}"></div>
+        <div><label>提前几天提醒</label><input id="t_remind" type="number" min="0" value="${t.remindDays}"></div>
+        <div><label>上次完成</label><input id="t_last" type="date" value="${t.lastDate||''}"></div>
+      </div>
+      <label>备注（可选）</label><input id="t_note" value="${esc(t.note)}">
+      <div class="actions">
+        ${isNew?'':`<button class="btn ghost" style="flex:0 0 84px" onclick="deleteTask('${t.id}')">删除</button>`}
+        <button class="btn ghost" onclick="closeModal()">取消</button>
+        <button class="btn" onclick="saveTask('${t.id}',${isNew})">保存</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function saveTask(id, isNew){
+  const v = k => document.getElementById(k).value;
+  const name = v('t_name').trim();
+  if(!name){ toast('写个名字'); return; }
+  const data = { id, name, catId: v('t_cat'), icon: v('t_icon').trim()||'📌',
+    cycleDays: Math.max(1, Number(v('t_cycle'))||30),
+    remindDays: Math.max(0, Number(v('t_remind'))||3),
+    lastDate: v('t_last'), note: v('t_note').trim() };
+  const i = db.tasks.findIndex(x=>x.id===id);
+  if(i>=0) db.tasks[i] = Object.assign(db.tasks[i], data);
+  else db.tasks.push(Object.assign({ key:'custom' }, data));
+  save(); closeModal(); renderTasks(); renderCats(); toast(isNew?'已添加':'已保存');
+}
+function deleteTask(id){
+  if(!confirm('删除这个事项？')) return;
+  db.tasks = db.tasks.filter(t=>t.id!==id);
+  save(); closeModal(); renderTasks(); renderCats();
+}
+
+/* ===================== 百科 ===================== */
+const WIKI = [
+  { t:'什么时候开始驱虫、多久一次', b:'幼猫一般 2 月龄开始：体内每 3 个月一次，体外每月一次（南方/草丛/多猫家庭可缩短）。成年室内猫也建议体内 3–6 个月、体外 1–3 个月。记录日期比记周期更重要。' },
+  { t:'体内外驱虫能同时做吗', b:'多数复方滴剂体内外同驱，可以同时；分开的药错开 3–5 天更稳。驱虫前后 2 小时不洗澡，滴剂点在颈后皮肤、别让它舔到。' },
+  { t:'换粮怎么过渡', b:'7 天过渡法：第 1–2 天新粮 25%，3–4 天 50%，5–6 天 75%，第 7 天全换。换快了容易软便，可同时加益生菌。' },
+  { t:'猫咪吐毛球正常吗', b:'偶尔吐毛球正常，每周超过 1 次或伴精神食欲下降要就医。长毛猫每周梳 3–4 次，比吃化毛膏更有效。' },
+  { t:'软便 / 拉稀怎么处理', b:'先看精神和食欲。精神好、能吃：禁食 6–8 小时（不禁水）+ 益生菌，观察 24 小时。带血、持续 2 天、伴呕吐或精神差 → 就医。' },
+  { t:'公猫排尿困难 = 急症', b:'频繁进猫砂盆却尿不出、蹲很久、叫、舔生殖器 → 可能尿闭，24 小时内可致命，立刻就医。公猫尤其高发，别等。' },
+  { t:'什么时候绝育', b:'一般 5–8 月龄、体重达标即可。术前禁食 8 小时（遵医嘱），术后戴伊丽莎白圈 7–10 天，观察伤口渗液与排尿。' },
+  { t:'疫苗怎么打', b:'幼猫 2 月龄起打三联，间隔 3–4 周共 2–3 针；狂犬 3 月龄后 1 针。成年后每年加强一次（室内单猫可与医生讨论延长）。' },
+  { t:'猫咪喝水量多少', b:'每公斤约 40–60 ml/天。3 kg 的猫约 150 ml。流动水碗、湿粮、多点水碗能明显提升饮水量，减少泌尿问题。' },
+  { t:'指甲、耳朵多久清理', b:'指甲 2–3 周剪一次（只剪透明尖端，避开血线）；耳朵 1–2 周看一眼，脏了用洗耳液擦外耳，不要棉签捅深。' },
+  { t:'猫粮怎么挑（看配料表）', b:'前三位是具体肉源；幼猫粗蛋白 ≥38%、成猫 ≥32%；钙磷比 1.1–1.3；牛磺酸 ≥0.2%。配方表比广告词重要。' },
+  { t:'家里有哪些致命危险', b:'百合（对猫剧毒，花粉也不行）、绿萝/万年青、灭鼠药、人用止痛药（布洛芬、对乙酰氨基酚）、线头皮筋、洗衣机。' },
+  { t:'多猫家庭怎么相处', b:'新猫先隔离 1–2 周，交换毛巾气味，再隔门喂食逐步见面。资源要 N+1（猫砂盆、食盆、水碗、爬架高点）。' },
+  { t:'猫咪应激（搬家、去医院、洗澡）', b:'提前 30–60 分钟用费洛蒙喷雾/插电，航空箱放件有它气味的衣服；不要强行抱出，让它自己出来。' },
+  { t:'多久洗一次澡', b:'室内猫 2–3 个月一次甚至更久即可，猫自己会清洁。洗太勤伤皮肤屏障；必须用猫专用香波，洗完彻底吹干。' },
+  { t:'怎么看猫咪胖不胖', b:'摸肋骨：轻按能摸到但看不到 = 正常；摸不到 = 偏胖。从上方看应有腰线。幼猫每月称一次，成猫每月一次就够。' },
+];
+
+function renderWiki(){
+  const q = (document.getElementById('wikiSearch').value||'').trim();
+  const list = q ? WIKI.filter(w=>(w.t+w.b).includes(q)) : WIKI;
+  document.getElementById('wikiList').innerHTML = list.length
+    ? list.map(w=>`<details><summary>${esc(w.t)}</summary><p>${esc(w.b)}</p></details>`).join('')
+    : `<div class="empty-state">没搜到，换个词试试</div>`;
+}
+
+/* ===================== 摄像头 ===================== */
 function editCamera(){
   const cam = db.camera;
   document.getElementById('modalRoot').innerHTML = `<div class="modal" onclick="if(event.target===this)closeModal()">
     <div class="sheet">
       <h2>摄像头</h2>
-      <div class="meta" style="margin-top:6px;line-height:1.6">填一个能在手机浏览器打开的画面地址：<br>
-        · 支持 RTSP 的摄像头，先把 RTSP 转成网页可播的 HLS/WebRTC（需要一台常开的电脑）<br>
-        · 或者直接填摄像头厂商的网页版地址 / 自建监控页</div>
+      <div class="hint">填一个手机浏览器能打开的画面地址：RTSP 需要先用 go2rtc / MediaMTX 转成网页可播的 WebRTC/HLS；也可以直接填厂商网页版地址。</div>
       <label>名称</label><input id="c_name" value="${esc(cam.name)}" placeholder="客厅 / 猫窝">
-      <label>地址</label><input id="c_url" value="${esc(cam.url)}" placeholder="http://192.168.1.10:8080/stream.html">
+      <label>地址</label><input id="c_url" value="${esc(cam.url)}" placeholder="http://192.168.1.10:1984/stream.html">
       <div class="actions">
         <button class="btn ghost" onclick="closeModal()">取消</button>
         <button class="btn" onclick="saveCamera()">保存</button>
@@ -421,35 +661,74 @@ function saveCamera(){
 }
 function openCamera(){
   if(!db.camera.url){ toast('先设置地址'); return; }
-  window.open(db.camera.url, '_blank');
+  window.open(db.camera.url,'_blank');
 }
 
-/* ========== 备份 ========== */
+/* ===================== 备份 / 日历 ===================== */
 function exportData(){
-  const blob = new Blob([JSON.stringify(db,null,2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `pawbook-${today()}.json`;
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  const blob = new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=`pawbook-${today()}.json`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 function importData(input){
-  const f = input.files[0]; if(!f) return;
-  const r = new FileReader();
-  r.onload = e => {
+  const f=input.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=e=>{
     try{
-      const d = JSON.parse(e.target.result);
-      if(!Array.isArray(d.cats)) throw new Error('格式不对');
-      db = Object.assign(structuredClone(DEFAULT), d);
-      save(); renderCats(); renderReminders(); renderWiki(); toast('导入成功');
+      const d=JSON.parse(e.target.result);
+      if(!Array.isArray(d.cats)) throw 0;
+      db=Object.assign(structuredClone(DEFAULT), d); save();
+      renderCats(); renderTasks(); renderWiki(); toast('导入成功');
     }catch(err){ toast('导入失败：文件格式不对'); }
   };
-  r.readAsText(f);
-  input.value = '';
+  r.readAsText(f); input.value='';
 }
 
-/* ========== 启动 ========== */
-renderCats(); renderWiki(); renderReminders();
+function exportICS(){
+  const stamp = s => s.replaceAll('-','');
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const dtstamp = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}T${pad(now.getHours())}${pad(now.getMinutes())}00`;
+  const lines = [
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//PawBook//CN','CALSCALE:GREGORIAN','METHOD:PUBLISH',
+    'X-WR-CALNAME:猫手册提醒'
+  ];
+  let count = 0;
+  db.tasks.forEach(t=>{
+    if(!t.lastDate) return;
+    const due = addDays(t.lastDate, Number(t.cycleDays)||30);
+    for(let i=0;i<12;i++){   // 未来一年内的 12 次
+      const d = addDays(due, i*(Number(t.cycleDays)||30));
+      if(daysBetween(today(), d) > 365) break;
+      const title = `${catName(t.catId)} · ${t.name}`;
+      lines.push('BEGIN:VEVENT',
+        `UID:${t.id}-${stamp(d)}@pawbook`,
+        `DTSTAMP:${dtstamp}`,
+        `DTSTART;VALUE=DATE:${stamp(d)}`,
+        `SUMMARY:${escapeICS(title)}`,
+        `DESCRIPTION:${escapeICS('来自猫手册 · 周期 '+(t.cycleDays||30)+' 天')}`,
+        'BEGIN:VALARM','TRIGGER:-PT9H','ACTION:DISPLAY','DESCRIPTION:提醒','END:VALARM',
+        'END:VEVENT');
+      count++;
+    }
+  });
+  lines.push('END:VCALENDAR');
+  const blob = new Blob([lines.join('\r\n')],{type:'text/calendar;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='pawbook-提醒.ics'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  toast(`导出了 ${count} 条日程`);
+}
+function escapeICS(s){ return String(s).replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n'); }
+
+/* ===================== 启动 ===================== */
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),1600);
+}
+
+renderCats(); renderTasks(); renderWiki();
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
