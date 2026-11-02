@@ -465,8 +465,6 @@ function openCatDetail(id){
   const age = c.birthday ? Math.floor(daysBetween(c.birthday, today())/30.4) : null;
 
   const kv = (k,v)=> v ? `<div class="kv"><span>${k}</span><span>${esc(v)}</span></div>` : '';
-  const wl = (c.weights||[]).slice().sort((a,b)=>a.d<b.d?-1:1);
-  const chart = weightChart(wl);
 
   document.getElementById('modalRoot').innerHTML = `<div class="modal" onclick="if(event.target===this)closeModal()">
     <div class="sheet">
@@ -487,14 +485,7 @@ function openCatDetail(id){
       </div>
 
       <div class="sect-title">体重记录</div>
-      <div class="card">
-        ${chart}
-        <div class="grid2" style="margin-top:8px">
-          <input id="w_kg" type="number" step="0.01" placeholder="kg">
-          <button class="btn small" onclick="addWeight('${c.id}')">记录今天</button>
-        </div>
-        <div class="hint">${wl.length?`最近：${wl.slice(-3).map(x=>fmt(x.d)+' '+x.kg+'kg').join(' / ')}`:'还没有记录'}</div>
-      </div>
+      ${weightPanel(c)}
 
       <div class="sect-title">疫苗记录</div>
       <div class="card">
@@ -524,13 +515,17 @@ function openCatDetail(id){
 
 function addWeight(catId){
   const c = db.cats.find(x=>x.id===catId); if(!c) return;
-  const el = document.getElementById('w_kg'); const kg = Number(el.value);
-  if(!kg || kg<=0){ toast('先填个体重'); return; }
+  const kgEl = document.getElementById('w_kg');
+  const dateEl = document.getElementById('w_date');
+  const kg = Number(kgEl ? kgEl.value : 0);
+  if(!kg || kg<=0 || kg>30){ toast('填个体重（0–30 kg）'); return; }
+  const d = (dateEl && dateEl.value) ? dateEl.value : today();
   c.weights = c.weights || [];
-  c.weights.push({ d: today(), kg });
-  c.weight = String(kg);
+  c.weights.push({ d, kg });
+  c.weights.sort((a,b)=> a.d < b.d ? -1 : 1);
+  c.weight = String(c.weights[c.weights.length-1].kg);
   const wt = db.tasks.find(t=>t.catId===catId && t.key==='weight');
-  if(wt) wt.lastDate = today();
+  if(wt && d === today()) wt.lastDate = today();
   save(); toast('已记录'); openCatDetail(catId); renderCats();
 }
 
@@ -549,21 +544,91 @@ function delVaccine(catId, i){
   c.vaccines.splice(i,1); save(); openCatDetail(catId);
 }
 
-function weightChart(list){
-  if(list.length < 2) return `<div class="hint">至少两条记录才画得出曲线</div>`;
-  const W=320,H=100,P=10;
-  const kgs = list.map(x=>Number(x.kg));
-  const min=Math.min(...kgs), max=Math.max(...kgs), span=(max-min)||1;
-  const pts = list.map((x,i)=>{
-    const px = P + i*(W-2*P)/(list.length-1);
-    const py = H-P - (Number(x.kg)-min)/span*(H-2*P);
-    return `${px.toFixed(1)},${py.toFixed(1)}`;
-  }).join(' ');
-  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:110px">
-    <polyline points="${pts}" fill="none" stroke="#d97a4a" stroke-width="2.5" stroke-linejoin="round"/>
-    <text x="${P}" y="12" font-size="10" fill="#8b8177">${max}kg</text>
-    <text x="${P}" y="${H-2}" font-size="10" fill="#8b8177">${min}kg</text>
-  </svg>`;
+function weightPanel(cat){
+  const list = (cat.weights||[]).slice().sort((a,b)=> a.d < b.d ? -1 : 1);
+  const cur  = list.length ? list[list.length-1] : null;
+  const prev = list.length > 1 ? list[list.length-2] : null;
+  const delta = (cur && prev) ? Number((cur.kg - prev.kg).toFixed(2)) : null;
+  const total = list.length > 1 ? Number((list[list.length-1].kg - list[0].kg).toFixed(2)) : null;
+  const days  = list.length > 1 ? daysBetween(list[0].d, list[list.length-1].d) : 0;
+  const dir = d => d > 0 ? '↑' : d < 0 ? '↓' : '→';
+
+  const head = `
+    <div class="row" style="justify-content:space-between;align-items:flex-end">
+      <div>
+        <div style="font-size:24px;font-weight:700;line-height:1.1">${cur ? cur.kg + ' <span style="font-size:14px;font-weight:500;color:var(--muted)">kg</span>' : '<span style="font-size:15px;color:var(--muted)">还没有记录</span>'}</div>
+        <div class="meta" style="margin-top:4px">${cur ? '最近一次 '+fmt(cur.d) : '记一次就会开始画曲线'}</div>
+      </div>
+      <div style="text-align:right">
+        ${delta!==null ? `<div class="badge b-none">比上次 ${dir(delta)} ${Math.abs(delta).toFixed(2)} kg</div>` : ''}
+        ${total!==null && days>0 ? `<div class="meta" style="margin-top:4px">${days} 天累计 ${dir(total)} ${Math.abs(total).toFixed(2)} kg</div>` : ''}
+      </div>
+    </div>`;
+
+  let chart = '';
+  if(list.length >= 2){
+    const W=340, H=132, PL=8, PR=46, PT=14, PB=24;
+    const kgs = list.map(x=>Number(x.kg));
+    let lo = Math.min(...kgs), hi = Math.max(...kgs);
+    if(hi - lo < 0.4){ const mid=(hi+lo)/2; lo=mid-0.2; hi=mid+0.2; }
+    const pad = (hi-lo)*0.12; lo-=pad; hi+=pad;
+    const x = i => PL + (list.length===1 ? (W-PL-PR)/2 : i*(W-PL-PR)/(list.length-1));
+    const y = v => PT + (hi-v)/(hi-lo)*(H-PT-PB);
+
+    const fmtY = v => (hi-lo > 0.6 ? v.toFixed(1) : v.toFixed(2));
+    const grid = [hi, (hi+lo)/2, lo].map(v=>{
+      const yy = y(v).toFixed(1);
+      return `<line x1="${PL}" y1="${yy}" x2="${W-PR}" y2="${yy}" stroke="#eee6da" stroke-width="1"/>
+              <text x="${W-PR+6}" y="${Number(yy)+4}" font-size="10" fill="#8b8177">${fmtY(v)}</text>`;
+    }).join('');
+
+    const pts = list.map((p,i)=>`${x(i).toFixed(1)},${y(Number(p.kg)).toFixed(1)}`).join(' ');
+    const dots = list.map((p,i)=>{
+      const last = i===list.length-1;
+      return `<circle cx="${x(i).toFixed(1)}" cy="${y(Number(p.kg)).toFixed(1)}" r="${last?4.5:2.8}"
+                fill="${last?'#d97a4a':'#fff'}" stroke="#d97a4a" stroke-width="2"/>`;
+    }).join('');
+
+    chart = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;margin-top:10px">
+      ${grid}
+      <polyline points="${pts}" fill="none" stroke="#d97a4a" stroke-width="2.5"
+        stroke-linejoin="round" stroke-linecap="round"/>
+      ${dots}
+      <text x="${PL}" y="${H-6}" font-size="10" fill="#8b8177">${fmt(list[0].d)}</text>
+      ${fmt(list[0].d)===fmt(list[list.length-1].d)?'':`<text x="${W-PR}" y="${H-6}" font-size="10" fill="#8b8177" text-anchor="end">${fmt(list[list.length-1].d)}</text>`}
+    </svg>`;
+  }else if(list.length === 1){
+    chart = `<div class="hint" style="margin-top:10px">只有 1 条记录（${list[0].kg} kg · ${fmt(list[0].d)}），再记一次就能连成线。</div>`;
+  }
+
+  const recent = list.slice().reverse().slice(0,5);
+  const rows = recent.map(r=>{
+    const i = list.indexOf(r);
+    return `<div class="list-item">
+      <span>${fmt(r.d)} · <b>${r.kg}</b> kg</span>
+      <a class="link" onclick="delWeight('${cat.id}',${i})">删除</a>
+    </div>`;
+  }).join('');
+
+  return `<div class="card">
+    ${head}
+    ${chart}
+    <div class="grid2" style="margin-top:12px">
+      <input id="w_kg" type="number" step="0.01" placeholder="kg，如 4.25">
+      <input id="w_date" type="date" value="${today()}">
+    </div>
+    <button class="btn small wide" style="margin-top:8px" onclick="addWeight('${cat.id}')">记录这笔</button>
+    ${rows ? `<div style="margin-top:10px">${rows}</div>` : ''}
+  </div>`;
+}
+
+function delWeight(catId, idx){
+  const c = db.cats.find(x=>x.id===catId); if(!c || !c.weights) return;
+  const list = c.weights.slice().sort((a,b)=> a.d < b.d ? -1 : 1);
+  const target = list[idx];
+  c.weights = c.weights.filter(w=> w !== target);
+  c.weight = c.weights.length ? String(c.weights.slice().sort((a,b)=> a.d<b.d?-1:1).pop().kg) : '';
+  save(); openCatDetail(catId); renderCats();
 }
 
 /* ===================== 编辑器：任务 ===================== */
