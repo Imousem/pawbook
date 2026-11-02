@@ -1,0 +1,13 @@
+{
+  "name": "猫手册 · PawBook",
+  "short_name": "猫手册",
+  "description": "猫猫档案、驱虫提醒、养猫百科",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f6f0e8",
+  "theme_color": "#f6f0e8",
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
