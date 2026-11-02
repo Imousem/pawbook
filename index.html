@@ -553,6 +553,19 @@ function weightPanel(cat){
   const days  = list.length > 1 ? daysBetween(list[0].d, list[list.length-1].d) : 0;
   const dir = d => d > 0 ? '↑' : d < 0 ? '↓' : '→';
 
+  const bandRaw = cat.wBand || null;
+  const band = (bandRaw && isFinite(bandRaw.lo) && isFinite(bandRaw.hi))
+    ? { lo:Math.min(Number(bandRaw.lo),Number(bandRaw.hi)), hi:Math.max(Number(bandRaw.lo),Number(bandRaw.hi)) }
+    : null;
+  let bandState = '';
+  if(band && cur){
+    const over = Number((cur.kg - band.hi).toFixed(2));
+    const under = Number((band.lo - cur.kg).toFixed(2));
+    bandState = (cur.kg > band.hi) ? `<div class="badge b-warn" style="margin-top:4px">高于上限 ${over} kg</div>`
+      : (cur.kg < band.lo) ? `<div class="badge b-warn" style="margin-top:4px">低于下限 ${under} kg</div>`
+      : `<div class="badge b-ok" style="margin-top:4px">在目标区间内</div>`;
+  }
+
   const head = `
     <div class="row" style="justify-content:space-between;align-items:flex-end">
       <div>
@@ -561,15 +574,17 @@ function weightPanel(cat){
       </div>
       <div style="text-align:right">
         ${delta!==null ? `<div class="badge b-none">比上次 ${dir(delta)} ${Math.abs(delta).toFixed(2)} kg</div>` : ''}
+        ${bandState}
         ${total!==null && days>0 ? `<div class="meta" style="margin-top:4px">${days} 天累计 ${dir(total)} ${Math.abs(total).toFixed(2)} kg</div>` : ''}
       </div>
     </div>`;
 
   let chart = '';
   if(list.length >= 2){
-    const W=340, H=132, PL=8, PR=46, PT=14, PB=24;
+    const W=340, H=140, PL=8, PR=46, PT=14, PB=26;
     const kgs = list.map(x=>Number(x.kg));
     let lo = Math.min(...kgs), hi = Math.max(...kgs);
+    if(band){ lo = Math.min(lo, band.lo); hi = Math.max(hi, band.hi); }
     if(hi - lo < 0.4){ const mid=(hi+lo)/2; lo=mid-0.2; hi=mid+0.2; }
     const pad = (hi-lo)*0.12; lo-=pad; hi+=pad;
     const x = i => PL + (list.length===1 ? (W-PL-PR)/2 : i*(W-PL-PR)/(list.length-1));
@@ -589,14 +604,35 @@ function weightPanel(cat){
                 fill="${last?'#d97a4a':'#fff'}" stroke="#d97a4a" stroke-width="2"/>`;
     }).join('');
 
+    const win = Math.min(7, list.length);
+    const ma = list.map((_,i)=>{ const s=Math.max(0,i-win+1); let sum=0; for(let k=s;k<=i;k++) sum+=Number(list[k].kg); return sum/(i-s+1); });
+    const maLine = (list.length>=4)
+      ? `<polyline points="${ma.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ')}" fill="none"
+          stroke="#b0876a" stroke-width="1.8" stroke-dasharray="5 4" stroke-linecap="round" opacity="0.95"/>` : '';
+    const bandRect = band ? (()=>{
+      const yTop = y(band.hi), yBot = y(band.lo);
+      const h = Math.max(0, yBot - yTop);
+      return `<rect x="${PL}" y="${yTop.toFixed(1)}" width="${W-PL-PR}" height="${h.toFixed(1)}" fill="#d97a4a" opacity="0.09"/>
+        <line x1="${PL}" y1="${yTop.toFixed(1)}" x2="${W-PR}" y2="${yTop.toFixed(1)}" stroke="#d97a4a" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
+        <line x1="${PL}" y1="${yBot.toFixed(1)}" x2="${W-PR}" y2="${yBot.toFixed(1)}" stroke="#d97a4a" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
+        <text x="${PL+3}" y="${(yTop-4).toFixed(1)}" font-size="9" fill="#b0876a">${band.lo}–${band.hi} kg</text>`;
+    })() : '';
+
     chart = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;margin-top:10px">
+      ${bandRect}
       ${grid}
       <polyline points="${pts}" fill="none" stroke="#d97a4a" stroke-width="2.5"
         stroke-linejoin="round" stroke-linecap="round"/>
+      ${maLine}
       ${dots}
       <text x="${PL}" y="${H-6}" font-size="10" fill="#8b8177">${fmt(list[0].d)}</text>
       ${fmt(list[0].d)===fmt(list[list.length-1].d)?'':`<text x="${W-PR}" y="${H-6}" font-size="10" fill="#8b8177" text-anchor="end">${fmt(list[list.length-1].d)}</text>`}
-    </svg>`;
+    </svg>
+    <div class="meta" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
+      <span>—— 实测</span>
+      ${list.length>=4?`<span style="color:#b0876a">– – ${win} 次平均</span>`:''}
+      ${band?`<span style="color:#b0876a">▮ 目标区间</span>`:''}
+    </div>`;
   }else if(list.length === 1){
     chart = `<div class="hint" style="margin-top:10px">只有 1 条记录（${list[0].kg} kg · ${fmt(list[0].d)}），再记一次就能连成线。</div>`;
   }
@@ -618,8 +654,23 @@ function weightPanel(cat){
       <input id="w_date" type="date" value="${today()}">
     </div>
     <button class="btn small wide" style="margin-top:8px" onclick="addWeight('${cat.id}')">记录这笔</button>
+    <div class="hint" style="margin-top:12px">目标区间：按品种/年龄问过医生后填，留空则不显示</div>
+    <div class="grid2" style="margin-top:6px">
+      <input id="b_lo" type="number" step="0.1" placeholder="下限 kg" value="${band?band.lo:''}">
+      <input id="b_hi" type="number" step="0.1" placeholder="上限 kg" value="${band?band.hi:''}">
+    </div>
+    <button class="btn ghost small wide" style="margin-top:8px" onclick="saveWeightBand('${cat.id}')">保存区间</button>
     ${rows ? `<div style="margin-top:10px">${rows}</div>` : ''}
   </div>`;
+}
+
+function saveWeightBand(catId){
+  const c = db.cats.find(x=>x.id===catId); if(!c) return;
+  const lo = parseFloat(document.getElementById('b_lo').value);
+  const hi = parseFloat(document.getElementById('b_hi').value);
+  if(isFinite(lo) && isFinite(hi) && lo>0 && hi>0 && lo!==hi){ c.wBand = {lo,hi}; toast('区间已保存'); }
+  else { delete c.wBand; toast('已清除区间'); }
+  save(); openCatDetail(catId); renderCats();
 }
 
 function delWeight(catId, idx){
