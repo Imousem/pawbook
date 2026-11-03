@@ -133,10 +133,15 @@ canvas{width:100%;height:110px;display:block}
     </div>
   </section>
 
-  <!-- 百科 -->
+  <!-- 忌讳 -->
   <section id="view-wiki" class="hidden">
-    <input id="wikiSearch" placeholder="搜一下：驱虫、换粮、吐毛球…" oninput="renderWiki()" />
-    <div class="card" style="margin-top:12px"><div id="wikiList"></div></div>
+    <div class="card" style="padding:12px 14px">
+      <div style="font-weight:600">当前最该防什么</div>
+      <div class="meta" id="wikiBanner" style="margin-top:4px"></div>
+    </div>
+    <input id="wikiSearch" placeholder="搜：百合 / 线 / 蚊香 / 尿闭…" oninput="renderWiki()" style="margin-top:10px" />
+    <div id="wikiChips" style="display:flex;gap:6px;overflow-x:auto;padding:10px 2px"></div>
+    <div id="wikiList"></div>
   </section>
 </main>
 
@@ -144,7 +149,7 @@ canvas{width:100%;height:110px;display:block}
   <div class="inner">
     <button id="tab-cats" class="on" onclick="switchTab('cats')"><span class="ico">🐾</span>档案</button>
     <button id="tab-tasks" onclick="switchTab('tasks')"><span class="ico">📅</span>日程</button>
-    <button id="tab-wiki" onclick="switchTab('wiki')"><span class="ico">📖</span>百科</button>
+    <button id="tab-wiki" onclick="switchTab('wiki')"><span class="ico">⚠️</span>忌讳</button>
   </div>
 </nav>
 
@@ -234,7 +239,7 @@ function switchTab(name){
     document.getElementById('view-'+k).classList.toggle('hidden', k!==name);
     document.getElementById('tab-'+k).classList.toggle('on', k===name);
   });
-  const titles = { cats:['猫手册','PawBook'], tasks:['日程','周期任务与提醒'], wiki:['养猫百科','常见问题速查'] };
+  const titles = { cats:['猫手册','PawBook'], tasks:['日程','周期任务与提醒'], wiki:['忌讳','这些别让它碰到'] };
   document.getElementById('pageTitle').textContent = titles[name][0];
   document.getElementById('pageSub').textContent = titles[name][1];
   if(name==='tasks') renderTasks();
@@ -806,32 +811,105 @@ function deleteTask(id){
   save(); closeModal(); renderTasks(); renderCats();
 }
 
-/* ===================== 百科 ===================== */
-const WIKI = [
-  { t:'什么时候开始驱虫、多久一次', b:'幼猫一般 2 月龄开始：体内每 3 个月一次，体外每月一次（南方/草丛/多猫家庭可缩短）。成年室内猫也建议体内 3–6 个月、体外 1–3 个月。记录日期比记周期更重要。' },
-  { t:'体内外驱虫能同时做吗', b:'多数复方滴剂体内外同驱，可以同时；分开的药错开 3–5 天更稳。驱虫前后 2 小时不洗澡，滴剂点在颈后皮肤、别让它舔到。' },
-  { t:'换粮怎么过渡', b:'7 天过渡法：第 1–2 天新粮 25%，3–4 天 50%，5–6 天 75%，第 7 天全换。换快了容易软便，可同时加益生菌。' },
-  { t:'猫咪吐毛球正常吗', b:'偶尔吐毛球正常，每周超过 1 次或伴精神食欲下降要就医。长毛猫每周梳 3–4 次，比吃化毛膏更有效。' },
-  { t:'软便 / 拉稀怎么处理', b:'先看精神和食欲。精神好、能吃：禁食 6–8 小时（不禁水）+ 益生菌，观察 24 小时。带血、持续 2 天、伴呕吐或精神差 → 就医。' },
-  { t:'公猫排尿困难 = 急症', b:'频繁进猫砂盆却尿不出、蹲很久、叫、舔生殖器 → 可能尿闭，24 小时内可致命，立刻就医。公猫尤其高发，别等。' },
-  { t:'什么时候绝育', b:'一般 5–8 月龄、体重达标即可。术前禁食 8 小时（遵医嘱），术后戴伊丽莎白圈 7–10 天，观察伤口渗液与排尿。' },
-  { t:'疫苗怎么打', b:'幼猫 2 月龄起打三联，间隔 3–4 周共 2–3 针；狂犬 3 月龄后 1 针。成年后每年加强一次（室内单猫可与医生讨论延长）。' },
-  { t:'猫咪喝水量多少', b:'每公斤约 40–60 ml/天。3 kg 的猫约 150 ml。流动水碗、湿粮、多点水碗能明显提升饮水量，减少泌尿问题。' },
-  { t:'指甲、耳朵多久清理', b:'指甲 2–3 周剪一次（只剪透明尖端，避开血线）；耳朵 1–2 周看一眼，脏了用洗耳液擦外耳，不要棉签捅深。' },
-  { t:'猫粮怎么挑（看配料表）', b:'前三位是具体肉源；幼猫粗蛋白 ≥38%、成猫 ≥32%；钙磷比 1.1–1.3；牛磺酸 ≥0.2%。配方表比广告词重要。' },
-  { t:'家里有哪些致命危险', b:'百合（对猫剧毒，花粉也不行）、绿萝/万年青、灭鼠药、人用止痛药（布洛芬、对乙酰氨基酚）、线头皮筋、洗衣机。' },
-  { t:'多猫家庭怎么相处', b:'新猫先隔离 1–2 周，交换毛巾气味，再隔门喂食逐步见面。资源要 N+1（猫砂盆、食盆、水碗、爬架高点）。' },
-  { t:'猫咪应激（搬家、去医院、洗澡）', b:'提前 30–60 分钟用费洛蒙喷雾/插电，航空箱放件有它气味的衣服；不要强行抱出，让它自己出来。' },
-  { t:'多久洗一次澡', b:'室内猫 2–3 个月一次甚至更久即可，猫自己会清洁。洗太勤伤皮肤屏障；必须用猫专用香波，洗完彻底吹干。' },
-  { t:'怎么看猫咪胖不胖', b:'摸肋骨：轻按能摸到但看不到 = 正常；摸不到 = 偏胖。从上方看应有腰线。幼猫每月称一次，成猫每月一次就够。' },
+/* ===================== 忌讳（替代原来的百科） ===================== */
+const DANGER = [
+  // ---- 吃的 ----
+  { cat:'吃的', sev:3, t:'葡萄 / 葡萄干', why:'可导致急性肾衰，猫比狗更敏感，几颗就可能出问题。', todo:'家里果盘别放在猫能到的地方；误食立刻联系医院。' },
+  { cat:'吃的', sev:3, t:'巧克力 / 咖啡 / 浓茶', why:'可可碱和咖啡因猫代谢极慢，会心跳过速、抽搐。', todo:'一律不给；黑巧毒性最高。' },
+  { cat:'吃的', sev:3, t:'洋葱 / 大蒜 / 韭菜 / 葱', why:'破坏红细胞造成溶血性贫血，熟的和汤汁里的一样有毒。', todo:'人吃的菜别顺手喂；含葱蒜的汤水倒掉。' },
+  { cat:'吃的', sev:3, t:'木糖醇', why:'无糖口香糖、部分花生酱/牙膏里有，会让猫低血糖、肝衰。', todo:'买零食先看配料表。' },
+  { cat:'吃的', sev:3, t:'酒精 / 生面团', why:'面团在胃里发酵产生酒精和气体，幼猫极危险。', todo:'酒和待发酵的面团离开台面。' },
+  { cat:'吃的', sev:2, t:'熟禽骨 / 鱼刺', why:'煮熟后变脆，咬碎成尖片，划伤食道和肠道。', todo:'骨头一律不进猫碗；鱼刺先挑净。' },
+  { cat:'吃的', sev:2, t:'狗粮长期当主食', why:'缺牛磺酸和足量动物蛋白，长期吃会导致心脏和视力问题。', todo:'偶尔偷吃几粒没事，别当饭。' },
+  { cat:'吃的', sev:2, t:'长期喂生鱼', why:'含硫胺素酶，破坏维生素 B1；还有寄生虫风险。', todo:'要么煮熟，要么正规冻杀处理。' },
+  { cat:'吃的', sev:1, t:'牛奶 / 奶油', why:'多数猫乳糖不耐，喝了拉稀，幼猫更容易脱水。', todo:'要喂就喂猫专用奶。' },
+  { cat:'吃的', sev:1, t:'高盐零食 / 火腿肠', why:'钠超标伤肾，香料也刺激肠胃。', todo:'人吃的加工肉不喂。' },
+
+  // ---- 植物 ----
+  { cat:'植物', sev:3, t:'百合（含花粉、花瓶水）', why:'对猫是剧毒，舔一口花粉都可能急性肾衰，且无解药。', todo:'家里不要养；收到花束先确认没有百合。' },
+  { cat:'植物', sev:3, t:'苏铁 / 夹竹桃 / 万年青', why:'强毒性，少量即可能致命。', todo:'不买不摆。' },
+  { cat:'植物', sev:2, t:'绿萝 / 龟背竹 / 滴水观音', why:'草酸钙结晶，咬一口就口舌灼痛、大量流涎。', todo:'挂高或换掉；猫爱啃叶尖。' },
+  { cat:'植物', sev:1, t:'芦荟 / 郁金香 / 菊花 / 圣诞红', why:'轻到中度中毒，多为呕吐流涎。', todo:'尽量不放在猫活动区。' },
+
+  // ---- 家里 ----
+  { cat:'家里', sev:3, t:'线 / 毛线 / 牙线 / 发圈 / 橡皮筋', why:'吞下去会在肠道里把肠子锯开（线性异物），幼猫极高发。', todo:'线类收进抽屉；发现嘴里有线，别硬拉，直接去医院。', young:1 },
+  { cat:'家里', sev:3, t:'纽扣电池 / 磁力珠', why:'电池在食道里漏液灼穿；多颗磁珠会互相吸住夹死肠壁。', todo:'遥控器、玩具电池仓检查有无松动。' },
+  { cat:'家里', sev:3, t:'洗衣机 / 烘干机', why:'猫爱钻暖窝，关机前不数猫就可能致命。', todo:'每次关门前进去看一眼。' },
+  { cat:'家里', sev:3, t:'没纱窗的窗户 / 阳台', why:'高层坠楼（高空综合征）是幼猫最常见的致命意外之一。', todo:'纱窗装牢；开窗前先确认猫在哪。', young:1 },
+  { cat:'家里', sev:2, t:'逗猫棒上的羽毛、铃铛、塑料片', why:'咬下来吞掉，卡在肠道要开刀。', todo:'玩完收进柜子，别留在地上。', young:1 },
+  { cat:'家里', sev:2, t:'塑料袋 / 保鲜膜 / 提手', why:'窒息或缠绕；幼猫会把塑料当玩具。', todo:'及时丢掉，不留在台面。' },
+  { cat:'家里', sev:2, t:'灶台 / 热水壶 / 电熨斗', why:'猫跳上去才被烫，往往来不及反应。', todo:'做完饭关闭并移开把手；幼猫别让进厨房。', young:1 },
+  { cat:'家里', sev:1, t:'门缝 / 柜门 / 抽屉', why:'夹尾巴和爪子，也会把猫困在柜子里一整夜。', todo:'关门前看一眼，关门别甩。' },
+  { cat:'家里', sev:1, t:'冰箱 / 微波炉 / 碗柜', why:'猫会趁你拿东西时钻进去。', todo:'关门前数一遍猫。' },
+
+  // ---- 药与化学 ----
+  { cat:'药与化学', sev:3, t:'人用止痛药（对乙酰氨基酚 / 布洛芬 / 阿司匹林）', why:'猫缺葡萄糖醛酸转移酶，一片扑热息痛就可能致命。', todo:'药盒锁进抽屉；掉地上的药片立刻找齐。' },
+  { cat:'药与化学', sev:3, t:'蚊香 / 电蚊香液 / 杀虫喷雾', why:'有效成分多为除虫菊酯，猫无法代谢，会抽搐、流涎。', todo:'用物理防蚊（纱窗）；别在猫房间点蚊香。' },
+  { cat:'药与化学', sev:3, t:'老鼠药', why:'抗凝类会让猫内出血；吃了中毒老鼠还会二次中毒。', todo:'家里有猫就别用鼠药；用粘鼠板也记得收。' },
+  { cat:'药与化学', sev:3, t:'烟草 / 电子烟烟油', why:'尼古丁对猫极毒，烟油几滴就要命。', todo:'烟和烟油收好，别让猫舔烟灰缸。' },
+  { cat:'药与化学', sev:2, t:'精油 / 香薰 / 茶树薄荷柑橘', why:'猫肝脏代谢不了萜类，吸入或舔到都会中毒。', todo:'不在猫附近扩香；不用精油给猫驱虫。' },
+  { cat:'药与化学', sev:2, t:'84 漂白水 / 洁厕灵', why:'混用会产生氯气；地面湿着猫走过再舔爪就是中毒。', todo:'分开放；拖地时把猫隔开，干透再放出来。', young:1 },
+  { cat:'药与化学', sev:2, t:'人用驱虫药 / 伊维菌素类', why:'剂量按体重算，人用或狗用剂量对猫可能是致死量。', todo:'只用猫专用、按体重给药。' },
+
+  // ---- 护理（幼猫尤其） ----
+  { cat:'护理', sev:2, t:'幼猫长时间不吃（低血糖）', why:'4 个月以下的猫血糖储备少，断食十几小时就可能昏迷。', todo:'一天 4–5 顿；生病不吃的幼猫要立刻就医。', young:1 },
+  { cat:'护理', sev:2, t:'疫苗没打完就出门 / 接触陌生猫', why:'猫瘟、鼻支在幼猫身上死亡率高。', todo:'三针完成前不外出、不串门、不托运。', young:1 },
+  { cat:'护理', sev:1, t:'频繁洗澡', why:'破坏皮脂膜，越洗越痒、越容易皮肤病。', todo:'室内猫 2–3 个月一次甚至更久；必须彻底吹干。', young:1 },
+  { cat:'护理', sev:1, t:'抓后颈 / 强行抱', why:'猫不是猫崽，被拎后颈会疼、挣扎、抓伤人。', todo:'托住胸和臀抱；挣扎就放下。' },
+
+  // ---- 急诊信号 ----
+  { cat:'急诊信号', sev:3, t:'公猫蹲猫砂盆却尿不出', why:'尿闭 24 小时内可致死，是最典型的猫科急症。', todo:'频繁进出、蹲很久、叫 → 立刻去医院，别等。' },
+  { cat:'急诊信号', sev:3, t:'张嘴呼吸 / 腹式呼吸', why:'猫几乎不会张嘴喘，出现就是靠呼吸在维持。', todo:'不要折腾它，尽快送医。' },
+  { cat:'急诊信号', sev:3, t:'误食上面任何一条', why:'很多毒物有黄金处理时间。', todo:'先打医院电话，别自己催吐（可能二次灼伤）。' },
+  { cat:'急诊信号', sev:2, t:'不吃饭超过 24 小时（幼猫 12 小时）', why:'猫断食容易脂肪肝，幼猫还会低血糖。', todo:'超过这个时间就要就医。' },
+  { cat:'急诊信号', sev:2, t:'呕吐一天超过 3 次', why:'脱水快，幼猫尤其扛不住。', todo:'带呕吐物照片去医院。' },
+  { cat:'急诊信号', sev:2, t:'躲起来不吃、不喝水', why:'猫表达疼痛的方式是隐藏，躲 = 已经很难受了。', todo:'先量体温、看牙龈颜色，尽快就医。' }
 ];
 
+let wikiCat = '全部';
+
 function renderWiki(){
-  const q = (document.getElementById('wikiSearch').value||'').trim();
-  const list = q ? WIKI.filter(w=>(w.t+w.b).includes(q)) : WIKI;
+  const q = (document.getElementById('wikiSearch').value || '').trim();
+  const bannerEl = document.getElementById('wikiBanner');
+  const chipsEl  = document.getElementById('wikiChips');
+
+  // 月龄提示
+  const ages = db.cats.map(c=>ageMonthsOf(c.birthday)).filter(x=>x !== null);
+  const youngest = ages.length ? Math.min(...ages) : null;
+  if(bannerEl){
+    bannerEl.innerHTML = youngest === null
+      ? '给猫填上「生日」，这里就会按它的月龄标出最该防的几项。'
+      : (youngest < 6
+        ? `有 <b>${youngest} 个月</b> 的小猫：标 ★ 的项目对它风险最高，先处理这些。`
+        : `最小的猫已 <b>${youngest} 个月</b>，下面的急诊信号对成猫同样适用。`);
+  }
+
+  // 分类筛选
+  const cats = ['全部', ...new Set(DANGER.map(d=>d.cat))];
+  if(chipsEl){
+    chipsEl.innerHTML = cats.map(c=>{
+      const on = c === wikiCat;
+      return `<button onclick="wikiCat='${c}';renderWiki()" style="flex:0 0 auto;padding:6px 12px;border-radius:999px;border:1px solid ${on?'#d97a4a':'#e6ddd0'};background:${on?'#d97a4a':'#fff'};color:${on?'#fff':'#5c534a'};font-size:13px">${c}</button>`;
+    }).join('');
+  }
+
+  let list = DANGER.filter(d=> wikiCat === '全部' || d.cat === wikiCat);
+  if(q) list = list.filter(d=> (d.t + d.why + d.todo).includes(q));
+
+  const sevBadge = s => s === 3 ? '<span class="badge b-warn">致命 / 急诊</span>'
+                  : s === 2 ? '<span class="badge b-none">高风险</span>'
+                  : '<span class="badge b-ok">注意</span>';
+
   document.getElementById('wikiList').innerHTML = list.length
-    ? list.map(w=>`<details><summary>${esc(w.t)}</summary><p>${esc(w.b)}</p></details>`).join('')
-    : `<div class="empty-state">没搜到，换个词试试</div>`;
+    ? list.map(d=>`<div class="card" style="padding:12px 14px;margin-top:8px">
+        <div class="row" style="justify-content:space-between;align-items:baseline;gap:8px">
+          <div style="font-weight:600">${esc(d.t)}${d.young?' <span style="color:#d97a4a">★</span>':''}</div>
+          ${sevBadge(d.sev)}
+        </div>
+        <div class="meta" style="margin-top:6px">${esc(d.why)}</div>
+        <div style="margin-top:6px;font-size:13px">👉 ${esc(d.todo)}</div>
+      </div>`).join('')
+    : `<div class="empty-state" style="margin-top:14px">没搜到，换个词试试</div>`;
 }
 
 /* ===================== 摄像头 ===================== */
