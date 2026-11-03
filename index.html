@@ -544,6 +544,61 @@ function delVaccine(catId, i){
   c.vaccines.splice(i,1); save(); openCatDetail(catId);
 }
 
+/* ===== 体重区间的品种参考（仅参考，不是诊断标准） ===== */
+const BREED_TABLE = [
+  { re:/布偶/,                          name:'布偶',   male:[5.5,8],   female:[4,6]   },
+  { re:/缅因/,                          name:'缅因',   male:[6,9],     female:[4.5,6.5] },
+  { re:/英短|蓝白|蓝猫|金渐层|银渐层/,  name:'英短',   male:[4,6.5],   female:[3,4.5] },
+  { re:/美短|起司/,                     name:'美短',   male:[4,6],     female:[3,4.5] },
+  { re:/拿破仑|曼基康|小短腿|矮脚/,     name:'拿破仑', male:[3,4.5],   female:[2.5,3.5] },
+  { re:/加菲|异短|波斯|扁脸/,           name:'扁脸系', male:[3.5,5.5], female:[3,4.5] },
+  { re:/暹罗|重点色/,                   name:'暹罗',   male:[4,5.5],   female:[3,4]   },
+  { re:/田园|橘|狸花|三花|玳瑁|奶牛|狮子猫/, name:'中华田园', male:[4,6], female:[3,4.5] }
+];
+const KITTEN_GROWTH = [[0,0.05],[1,0.13],[2,0.25],[3,0.35],[4,0.45],[5,0.55],[6,0.65],[9,0.8],[12,0.95],[18,1]];
+function kittenFactor(m){
+  if(m === null || m >= 18) return 1;
+  if(m <= 0) return 0.05;
+  for(let i=1;i<KITTEN_GROWTH.length;i++){
+    const a = KITTEN_GROWTH[i-1], b = KITTEN_GROWTH[i];
+    if(m <= b[0]){ const t = (m - a[0]) / (b[0] - a[0]); return a[1] + (b[1]-a[1]) * t; }
+  }
+  return 1;
+}
+function ageMonthsOf(birth){
+  if(!birth) return null;
+  const d = new Date(birth); if(isNaN(d.getTime())) return null;
+  const n = new Date();
+  let m = (n.getFullYear()-d.getFullYear())*12 + (n.getMonth()-d.getMonth());
+  if(n.getDate() < d.getDate()) m -= 1;
+  return Math.max(0, m);
+}
+function suggestBand(cat){
+  const txt = (cat.breed || '') + ' ' + (cat.color || '');
+  const hit = BREED_TABLE.find(b => b.re.test(txt)) || BREED_TABLE[BREED_TABLE.length-1];
+  const sex = cat.sex === 'm' ? 'male' : cat.sex === 'f' ? 'female' : 'mix';
+  const adult = sex === 'male' ? hit.male
+              : sex === 'female' ? hit.female
+              : [ (hit.male[0]+hit.female[0])/2, (hit.male[1]+hit.female[1])/2 ];
+  const m = ageMonthsOf(cat.birthday);
+  const f = kittenFactor(m);
+  const lo = Number((adult[0]*f).toFixed(1));
+  let hi = Number((adult[1]*f).toFixed(1));
+  if(hi <= lo) hi = Number((lo + 0.2).toFixed(1));
+  return {
+    lo, hi, breed: hit.name,
+    sexTxt: cat.sex === 'm' ? '公' : cat.sex === 'f' ? '母' : '性别未知',
+    ageTxt: m === null ? '年龄未知' : (m < 18 ? m + ' 个月' : '成猫'),
+    hasAge: m !== null
+  };
+}
+function useSuggestedBand(catId){
+  const c = db.cats.find(x=>x.id===catId); if(!c) return;
+  const s = suggestBand(c);
+  c.wBand = { lo:s.lo, hi:s.hi };
+  save(); toast(`已套用 ${s.lo}–${s.hi} kg`); openCatDetail(catId);
+}
+
 function weightPanel(cat){
   const list = (cat.weights||[]).slice().sort((a,b)=> a.d < b.d ? -1 : 1);
   const cur  = list.length ? list[list.length-1] : null;
@@ -637,13 +692,30 @@ function weightPanel(cat){
     chart = `<div class="hint" style="margin-top:10px">只有 1 条记录（${list[0].kg} kg · ${fmt(list[0].d)}），再记一次就能连成线。</div>`;
   }
 
-  const recent = list.slice().reverse().slice(0,5);
-  const rows = recent.map(r=>{
-    const i = list.indexOf(r);
-    return `<div class="list-item">
-      <span>${fmt(r.d)} · <b>${r.kg}</b> kg</span>
-      <a class="link" onclick="delWeight('${cat.id}',${i})">删除</a>
-    </div>`;
+  // 按月分组（新的在前），每组可折叠
+  const byMonth = {};
+  list.slice().reverse().forEach(r=>{
+    const k = (r.d || '').slice(0,7);
+    (byMonth[k] = byMonth[k] || []).push(r);
+  });
+  const months = Object.keys(byMonth);
+  const rows = months.map((k, idx)=>{
+    const arr = byMonth[k];
+    const avg = (arr.reduce((a,b)=> a + Number(b.kg), 0) / arr.length).toFixed(2);
+    const items = arr.map(r=>{
+      const i = list.indexOf(r);
+      return `<div class="list-item">
+        <span>${fmt(r.d)} · <b>${r.kg}</b> kg</span>
+        <a class="link" onclick="delWeight('${cat.id}',${i})">删除</a>
+      </div>`;
+    }).join('');
+    const [y, m] = k.split('-');
+    return `<details ${idx === 0 ? 'open' : ''} style="margin-top:8px">
+      <summary style="cursor:pointer;font-size:13px;color:#6b6259;padding:4px 0">
+        ${y} 年 ${Number(m)} 月 · ${arr.length} 次 · 均值 ${avg} kg
+      </summary>
+      ${items}
+    </details>`;
   }).join('');
 
   return `<div class="card">
@@ -654,7 +726,11 @@ function weightPanel(cat){
       <input id="w_date" type="date" value="${today()}">
     </div>
     <button class="btn small wide" style="margin-top:8px" onclick="addWeight('${cat.id}')">记录这笔</button>
-    <div class="hint" style="margin-top:12px">目标区间：按品种/年龄问过医生后填，留空则不显示</div>
+    <div class="hint" style="margin-top:12px">目标区间：可手填，也可按品种/月龄取参考值</div>
+    ${(()=>{ const s = suggestBand(cat); return `<div class="meta" style="margin-top:6px">
+      参考：<b>${s.lo}–${s.hi} kg</b>（${s.breed} · ${s.sexTxt} · ${s.ageTxt}）
+      <a class="link" style="margin-left:6px" onclick="useSuggestedBand('${cat.id}')">套用</a>
+    </div>`; })()}
     <div class="grid2" style="margin-top:6px">
       <input id="b_lo" type="number" step="0.1" placeholder="下限 kg" value="${band?band.lo:''}">
       <input id="b_hi" type="number" step="0.1" placeholder="上限 kg" value="${band?band.hi:''}">
