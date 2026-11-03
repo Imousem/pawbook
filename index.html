@@ -143,6 +143,20 @@ canvas{width:100%;height:110px;display:block}
     <div id="wikiChips" style="display:flex;gap:6px;overflow-x:auto;padding:10px 2px"></div>
     <div id="wikiList"></div>
   </section>
+
+  <!-- 装备 -->
+  <section id="view-gear" class="hidden">
+    <div class="card" style="padding:12px 14px">
+      <div class="row" style="justify-content:space-between;align-items:baseline">
+        <div style="font-weight:600">装备清单</div>
+        <div class="meta" id="gearSum"></div>
+      </div>
+      <div class="meta" id="gearHint" style="margin-top:6px"></div>
+    </div>
+    <div id="gearChips" style="display:flex;gap:6px;overflow-x:auto;padding:10px 2px"></div>
+    <div id="gearList"></div>
+    <button class="btn ghost small wide" style="margin-top:12px" onclick="openGearEditor()">＋ 加一件自己的</button>
+  </section>
 </main>
 
 <nav>
@@ -150,6 +164,7 @@ canvas{width:100%;height:110px;display:block}
     <button id="tab-cats" class="on" onclick="switchTab('cats')"><span class="ico">🐾</span>档案</button>
     <button id="tab-tasks" onclick="switchTab('tasks')"><span class="ico">📅</span>日程</button>
     <button id="tab-wiki" onclick="switchTab('wiki')"><span class="ico">⚠️</span>忌讳</button>
+    <button id="tab-gear" onclick="switchTab('gear')"><span class="ico">🧰</span>装备</button>
   </div>
 </nav>
 
@@ -235,15 +250,16 @@ function taskStatus(t){
 
 /* ===================== 渲染：档案 ===================== */
 function switchTab(name){
-  ['cats','tasks','wiki'].forEach(k=>{
+  ['cats','tasks','wiki','gear'].forEach(k=>{
     document.getElementById('view-'+k).classList.toggle('hidden', k!==name);
     document.getElementById('tab-'+k).classList.toggle('on', k===name);
   });
-  const titles = { cats:['猫手册','PawBook'], tasks:['日程','周期任务与提醒'], wiki:['忌讳','这些别让它碰到'] };
+  const titles = { cats:['猫手册','PawBook'], tasks:['日程','周期任务与提醒'], wiki:['忌讳','这些别让它碰到'], gear:['装备','买什么 / 不用买'] };
   document.getElementById('pageTitle').textContent = titles[name][0];
   document.getElementById('pageSub').textContent = titles[name][1];
   if(name==='tasks') renderTasks();
   if(name==='wiki') renderWiki();
+  if(name==='gear') renderGear();
 }
 
 function catCard(cat){
@@ -809,6 +825,155 @@ function deleteTask(id){
   if(!confirm('删除这个事项？')) return;
   db.tasks = db.tasks.filter(t=>t.id!==id);
   save(); closeModal(); renderTasks(); renderCats();
+}
+
+/* ===================== 装备清单 ===================== */
+const GEAR = [
+  // 必买
+  { id:'litter',  cat:'必买', t:'猫砂盆（大号敞开式）', note:'长度至少 1.5 倍体长；幼猫先买矮边。数量 = 猫数 + 1，别挤在小角落', price:'50–150' },
+  { id:'litter2', cat:'必买', t:'猫砂', note:'先买两袋试接受度；豆腐砂好清理、膨润土更便宜但灰大', price:'30–80 / 袋' },
+  { id:'food',    cat:'必买', t:'幼猫粮', note:'配料表前三位是具体肉；幼猫粗蛋白 ≥38%，别直接换成猫粮', price:'80–200 / 2kg' },
+  { id:'bowl',    cat:'必买', t:'食盆 + 水碗（陶瓷或不锈钢）', note:'宽口浅盘，防"胡须疲劳"；塑料碗易黑下巴', price:'20–60' },
+  { id:'carrier', cat:'必买', t:'航空箱（硬壳）', note:'能在里面站起来转身；软包猫一慌会抓破', price:'60–200' },
+  { id:'scratcher', cat:'必买', t:'猫抓板 / 猫爬架', note:'竖立式，高度 ≥ 猫站立身长；越早给越不容易抓沙发', price:'40–300' },
+  { id:'clipper', cat:'必买', t:'猫用指甲剪', note:'剪刀式比人用指甲钳好使，只剪透明尖端', price:'15–40' },
+  { id:'deworm',  cat:'必买', t:'体内外驱虫药', note:'按体重算剂量；猫专用，别用人用或狗用', price:'60–150 / 次' },
+
+  // 推荐
+  { id:'fountain',cat:'推荐', t:'饮水机 / 流动水碗', note:'能明显提升饮水量，减少泌尿问题；记得每周拆洗', price:'100–300' },
+  { id:'comb',    cat:'推荐', t:'梳子（排梳 + 针梳）', note:'长毛猫必需，每周 3–4 次比吃化毛膏更有效', price:'20–80' },
+  { id:'ear',     cat:'推荐', t:'洗耳液', note:'只擦外耳，不要用棉签捅深', price:'30–60' },
+  { id:'scale',   cat:'推荐', t:'电子秤（婴儿秤/厨房秤）', note:'每月称一次，比肉眼看胖瘦靠谱', price:'50–150' },
+  { id:'feliway', cat:'推荐', t:'费洛蒙喷雾 / 插电', note:'出行、搬家、多猫磨合时用；不是药，是辅助', price:'100–200' },
+  { id:'probio',  cat:'推荐', t:'益生菌', note:'换粮、软便时用；选猫专用菌株', price:'50–120' },
+  { id:'cone',    cat:'推荐', t:'伊丽莎白圈（软圈）', note:'绝育、皮肤病时必备；软圈比硬塑料舒服', price:'20–50' },
+  { id:'wipe',    cat:'推荐', t:'宠物湿巾', note:'擦爪、擦屁股；不要用人用湿巾（含酒精/香精）', price:'15–30' },
+  { id:'pad',     cat:'推荐', t:'尿垫 / 除臭', note:'幼猫到家前期、老猫用；别用带香味的猫砂遮味', price:'20–50' },
+  { id:'tooth',   cat:'推荐', t:'猫用牙刷 + 牙膏', note:'越早开始越接受；人用牙膏不能吞，猫不能用人用的', price:'30–60' },
+
+  // 别买
+  { id:'no1', cat:'别买', t:'全封闭猫砂盆', note:'里面闷臭、猫不愿进，容易憋尿 → 尿闭风险', price:'—' },
+  { id:'no2', cat:'别买', t:'带铃铛的项圈', note:'高频响声伤听力，还可能勾住家具窒息', price:'—' },
+  { id:'no3', cat:'别买', t:'猫窝（贵的）', note:'多数猫只睡纸箱和你的床；先给个纸箱看反应', price:'—' },
+  { id:'no4', cat:'别买', t:'自动喂食器（初期）', note:'只适合干粮，卡粮就是饿一天；幼猫更要人盯着吃', price:'—' },
+  { id:'no5', cat:'别买', t:'塑料双碗连体', note:'容易黑下巴，也不好清洗', price:'—' },
+  { id:'no6', cat:'别买', t:'遛猫绳（没训练）', note:'猫不是狗，强行遛极易应激；要遛得先做牵引训练', price:'—' },
+  { id:'no7', cat:'别买', t:'人用沐浴露', note:'酸碱度不对，伤皮肤屏障；用猫专用或干脆不洗', price:'—' }
+];
+
+let gearCat = '必买';
+
+function gearState(){
+  if(!db.gear) db.gear = { custom:[], state:{} };
+  if(!db.gear.state) db.gear.state = {};
+  if(!Array.isArray(db.gear.custom)) db.gear.custom = [];
+  return db.gear;
+}
+function gearAll(){
+  const g = gearState();
+  return GEAR.concat(g.custom.map(c=>({ ...c, custom:true })));
+}
+function toggleGear(id){
+  const g = gearState();
+  const cur = g.state[id] || {};
+  cur.done = !cur.done;
+  g.state[id] = cur;
+  save(); renderGear();
+}
+function setGearPaid(id, v){
+  const g = gearState();
+  const cur = g.state[id] || {};
+  cur.paid = v === '' ? null : Number(v);
+  g.state[id] = cur;
+  save(); renderGear();
+}
+function priceLo(p){
+  const m = String(p||'').match(/(\d+)/);
+  return m ? Number(m[1]) : 0;
+}
+
+function renderGear(){
+  const g = gearState();
+  const all = gearAll();
+
+  // 概览
+  const sumEl = document.getElementById('gearSum');
+  const hintEl = document.getElementById('gearHint');
+  const must = all.filter(x=>x.cat==='必买');
+  const doneMust = must.filter(x=> (g.state[x.id]||{}).done);
+  const budget = all.filter(x=>x.cat!=='别买').reduce((a,x)=> a + priceLo(x.price), 0);
+  const spent = Object.values(g.state).reduce((a,s)=> a + (Number(s.paid)||0), 0);
+  if(sumEl) sumEl.innerHTML = `必买 <b>${doneMust.length}/${must.length}</b> · 参考预算约 ¥${budget} · 已花 ¥${spent}`;
+  if(hintEl){
+    const ages = db.cats.map(c=>ageMonthsOf(c.birthday)).filter(x=>x!==null);
+    const y = ages.length ? Math.min(...ages) : null;
+    hintEl.textContent = y !== null && y < 6
+      ? `最小 ${y} 个月：先保证猫砂盆、幼猫粮、航空箱三件，其它可以慢慢添。`
+      : '价格是常见区间，按你当地情况看；「别买」那栏是省钱的。';
+  }
+
+  // 分类
+  const cats = ['必买','推荐','别买','全部'];
+  const chips = document.getElementById('gearChips');
+  if(chips){
+    chips.innerHTML = cats.map(c=>{
+      const on = c === gearCat;
+      return `<button onclick="gearCat='${c}';renderGear()" style="flex:0 0 auto;padding:6px 12px;border-radius:999px;border:1px solid ${on?'#d97a4a':'#e6ddd0'};background:${on?'#d97a4a':'#fff'};color:${on?'#fff':'#5c534a'};font-size:13px">${c}</button>`;
+    }).join('');
+  }
+
+  const list = all.filter(x=> gearCat === '全部' || x.cat === gearCat);
+  document.getElementById('gearList').innerHTML = list.map(x=>{
+    const st = g.state[x.id] || {};
+    const done = !!st.done;
+    const isNo = x.cat === '别买';
+    return `<div class="card" style="padding:12px 14px;margin-top:8px">
+      <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          ${isNo ? `<span style="font-size:16px">🚫</span>`
+                 : `<input type="checkbox" ${done?'checked':''} onchange="toggleGear('${x.id}')" style="width:20px;height:20px;margin-top:2px;accent-color:#d97a4a">`}
+          <div>
+            <div style="font-weight:600;${done?'text-decoration:line-through;color:#a59b90':''}">${esc(x.t)}${x.custom?' <span class="badge b-none">自定义</span>':''}</div>
+            <div class="meta" style="margin-top:4px">${esc(x.note)}</div>
+          </div>
+        </div>
+        <div style="text-align:right;flex:0 0 auto">
+          <div class="meta">${esc(x.price)}</div>
+          ${isNo ? '' : `<input type="number" inputmode="decimal" placeholder="实付" value="${st.paid ?? ''}"
+            onchange="setGearPaid('${x.id}', this.value)"
+            style="width:74px;margin-top:6px;font-size:13px;padding:4px 6px">`}
+        </div>
+      </div>
+    </div>`;
+  }).join('') || `<div class="empty-state" style="margin-top:14px">这一类还没有东西</div>`;
+}
+
+function openGearEditor(){
+  document.getElementById('modalRoot').innerHTML = `<div class="modal" onclick="if(event.target===this)closeModal()">
+    <div class="sheet">
+      <h2>加一件自己的</h2>
+      <label>名称</label><input id="g_name" placeholder="比如 猫爬架 / 尿垫">
+      <label>分类</label>
+      <select id="g_cat"><option>必买</option><option selected>推荐</option><option>别买</option></select>
+      <label>参考价</label><input id="g_price" placeholder="比如 100–200">
+      <label>备注</label><input id="g_note" placeholder="为什么需要它">
+      <div class="row" style="gap:10px;margin-top:16px">
+        <button class="btn ghost" style="flex:1" onclick="closeModal()">取消</button>
+        <button class="btn" style="flex:1" onclick="saveGearItem()">保存</button>
+      </div>
+    </div>
+  </div>`;
+}
+function saveGearItem(){
+  const g = gearState();
+  const name = document.getElementById('g_name').value.trim();
+  if(!name) return toast('先填个名字');
+  g.custom.push({
+    id:'c_'+uid(), cat:document.getElementById('g_cat').value, t:name,
+    note:document.getElementById('g_note').value.trim() || '自定义项',
+    price:document.getElementById('g_price').value.trim() || '—'
+  });
+  save(); closeModal(); renderGear(); toast('已加入清单');
 }
 
 /* ===================== 忌讳（替代原来的百科） ===================== */
