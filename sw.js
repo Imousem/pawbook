@@ -1,7 +1,7 @@
 /* 猫手册 PawBook · 离线缓存
    策略：安装时预缓存外壳；请求优先走缓存，网络失败回落缓存。
    升级：改动 index.html 后把 VERSION 加一，用户下次打开会自动换新。 */
-const VERSION = 'pawbook-v10';
+const VERSION = 'pawbook-v11';
 const ASSETS = [
   './',
   './index.html',
